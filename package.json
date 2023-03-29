@@ -1,0 +1,46 @@
+{
+  "name": "@teoti/temporal",
+  "productName": "Temporal",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Budgeting app with a sense of time.",
+  "author": "jacksonsalopek <jackson.salopek@gmail.com>",
+  "license": "MIT",
+  "main": "dist/main/index.cjs",
+  "scripts": {
+    "dev": "node scripts/watch.mjs",
+    "build": "npm run typecheck && node scripts/build.mjs && electron-builder --config .electron-builder.config.js",
+    "typecheck": "tsc --noEmit --project packages/renderer/tsconfig.json"
+  },
+  "engines": {
+    "node": ">=18.15.0"
+  },
+  "dependencies": {
+    "daisyui": "^2.51.5",
+    "electron-store": "^8.1.0",
+    "solid-icons": "^1.0.4"
+  },
+  "packageManager": "pnpm@8.0.0",
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.9",
+    "@types/react": "^18.0.31",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^3.1.0",
+    "autoprefixer": "^10.4.14",
+    "electron": "^23.2.0",
+    "electron-builder": "^24.1.1",
+    "postcss": "^8.4.21",
+    "solid-app-router": "^0.4.2",
+    "solid-js": "^1.6.16",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.0.2",
+    "vite": "^4.2.1",
+    "vite-plugin-resolve": "^2.3.0",
+    "vite-plugin-solid": "^2.6.1"
+  },
+  "env": {
+    "//": "Used in build scripts",
+    "PORT": 3344,
+    "APP_NAME": "Temporal"
+  }
+}
