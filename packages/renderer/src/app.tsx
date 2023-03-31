@@ -1,31 +1,84 @@
-import { Component } from "solid-js";
+import { Component, createSignal } from "solid-js";
 import { Link, useRoutes, useLocation } from "solid-app-router";
 import {
 	RiSystemDashboardLine,
 	RiBusinessCalendar2Line,
 	RiBusinessLineChartLine,
 	RiSystemSettings3Line,
+	RiSystemSearchEyeLine,
 } from "solid-icons/ri";
-import { FaSolidTimeline } from "solid-icons/fa";
-import { BiRegularPieChartAlt2 } from "solid-icons/bi";
+import {
+	FaSolidCircle,
+	FaSolidCircleMinus,
+	FaSolidCirclePlus,
+	FaSolidCircleXmark,
+	FaSolidTimeline,
+} from "solid-icons/fa";
+import { OcSidebarcollapse3, OcSidebarexpand3 } from "solid-icons/oc";
 
 import { routes } from "./routes";
 
 const App: Component = () => {
+	const [sidebarOpen, setSidebarOpen] = createSignal(false);
+	const [hoveringWindowButtons, setHoveringWindowButtons] = createSignal(false);
 	const location = useLocation();
 	const Route = useRoutes(routes);
-	const URL =
-		process.env.NODE_ENV === "development" ? (
-			<div class="navbar-center lg:flex flex-1">
-				URL:&nbsp;<pre>{location.pathname}</pre>
-			</div>
-		) : (
-			<div />
-		);
+	const initialWindowButtons = (
+		<>
+			<FaSolidCircle size={12} class="window-button" />
+			<FaSolidCircle size={12} class="window-button" />
+			<FaSolidCircle size={12} class="window-button" />
+		</>
+	);
+	const hoverWindowButtons = (
+		<>
+			<FaSolidCircleXmark
+				size={12}
+				class="window-button fill-error"
+				onClick={() => {
+					window.electron.send("close");
+				}}
+			/>
+			<FaSolidCircleMinus
+				size={12}
+				class="window-button fill-warning"
+				onClick={() => {
+					window.electron.send("minimize");
+				}}
+			/>
+			<FaSolidCirclePlus
+				size={12}
+				class="window-button fill-success"
+				onClick={() => {
+					window.electron.send("maximize");
+				}}
+			/>
+		</>
+	);
+
+	const getNameFromPathname = (pathname: string) => {
+		if (pathname === "/") {
+			return "Dashboard";
+		}
+		const name = pathname.split("/")[1];
+		return name.charAt(0).toUpperCase() + name.slice(1);
+	};
 
 	return (
-		<>
-			<div class="navbar bg-base-100">
+		<div class="mockup-window bg-neutral">
+			<div
+				id="window-buttons"
+				class="grid gap-2 ml-4 mt-1.5"
+				onMouseEnter={(e) => {
+					setHoveringWindowButtons(true);
+				}}
+				onMouseLeave={(e) => {
+					setHoveringWindowButtons(false);
+				}}
+			>
+				{hoveringWindowButtons() ? hoverWindowButtons : initialWindowButtons}
+			</div>
+			<div class="navbar bg-neutral text-primary-content pl-24 -my-5">
 				<div class="flex-none">
 					<button
 						class="btn btn-square btn-ghost drawer-button"
@@ -33,41 +86,36 @@ const App: Component = () => {
 						type="button"
 						onClick={() => {
 							document.getElementById("my-drawer")?.click();
+							setSidebarOpen(!sidebarOpen());
 						}}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							class="inline-block w-5 h-5 stroke-current"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 6h16M4 12h16M4 18h16"
-							/>
-						</svg>
+						{sidebarOpen() ? (
+							<OcSidebarcollapse3 size={24} class="rotate-180" />
+						) : (
+							<OcSidebarexpand3 size={24} class="rotate-180" />
+						)}
 					</button>
 				</div>
-				<div class="flex-1">
-					<Link href="/" class="btn btn-ghost normal-case text-xl">
-						Temporal
-					</Link>
+				<div class="flex-none normal-case text-xl ml-2 font-semibold">
+					{getNameFromPathname(location.pathname)}
 				</div>
-				{URL}
+				<div class="navbar-center lg:flex flex-1" />
 				<div class="flex-none gap-2">
 					<div class="form-control">
-						<input
-							type="text"
-							placeholder="Search"
-							class="input input-bordered"
-						/>
+						<div class="input-group">
+							<input type="text" placeholder="Search…" class="input" />
+							<button
+								class="btn btn-square bg-base-100 border-none"
+								title="Search button"
+							>
+								<RiSystemSearchEyeLine size={24} />
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
 
-			<div class="drawer">
+			<div class="drawer mt-5">
 				<input id="my-drawer" type="checkbox" class="drawer-toggle" />
 				<div class="drawer-content">
 					<main>
@@ -75,8 +123,8 @@ const App: Component = () => {
 					</main>
 				</div>
 				<div class="drawer-side">
-					<label htmlFor="my-drawer" class="drawer-overlay" />
-					<ul class="menu p-4 w-80 bg-base-100 text-base-content">
+					<label class="drawer-overlay" />
+					<ul class="menu p-4 w-60 bg-base-100 text-base-content">
 						<li>
 							<Link href="/">
 								<RiSystemDashboardLine /> Dashboard
@@ -103,7 +151,7 @@ const App: Component = () => {
 						<div class="bottom-0">
 							<div class="divider" />
 							<li>
-								<Link href="/">
+								<Link href="/settings">
 									<RiSystemSettings3Line /> Settings
 								</Link>
 							</li>
@@ -111,7 +159,25 @@ const App: Component = () => {
 					</ul>
 				</div>
 			</div>
-		</>
+			<style jsx global>{`
+				/* Add global styles here */
+				.navbar-center {
+					-webkit-app-region: drag;
+					height: 32px;
+				}
+				#root>.mockup-window:before {
+					content: none;
+				}
+				#root>.mockup-window:before:hover {
+					box-shadow: 1.4em 0 0 0 red, 2.8em 0 0 0 yellow, 4.2em 0 0 0 green;
+				}
+				#window-buttons {
+					grid-template-columns: repeat(3, 1fr);
+					position: absolute;
+					-webkit-app-region: no-drag;
+				}
+			`}</style>
+		</div>
 	);
 };
 

@@ -1,5 +1,4 @@
-import fs from "fs";
-import { contextBridge, IpcRenderer, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import { domReady } from "./utils";
 import { useLoading } from "./loading";
 
@@ -12,25 +11,38 @@ const { appendLoading, removeLoading } = useLoading();
 })();
 
 // --------- Expose some API to the Renderer process. ---------
-contextBridge.exposeInMainWorld("fs", fs);
+// contextBridge.exposeInMainWorld("fs", fs);
 contextBridge.exposeInMainWorld("removeLoading", removeLoading);
 contextBridge.exposeInMainWorld("ipcRenderer", withPrototype(ipcRenderer));
+contextBridge.exposeInMainWorld("electron", {
+  on(eventName, callback) {
+    ipcRenderer.on(eventName, callback);
+  },
+
+  async invoke(eventName, ...params) {
+    return await ipcRenderer.invoke(eventName, ...params);
+  },
+
+  send(eventName, ...params) {
+    ipcRenderer.send(eventName, ...params);
+  },
+});
 
 // `exposeInMainWorld` can't detect attributes and methods of `prototype`, manually patching it.
-function withPrototype(renderer: IpcRenderer) {
-  const protos = Object.getPrototypeOf(renderer);
+function withPrototype(obj: Object) {
+  const protos = Object.getPrototypeOf(obj);
 
   Object.entries(protos).forEach(([key, value]) => {
-    if (Object.prototype.hasOwnProperty.call(renderer, key)) return;
+    if (Object.prototype.hasOwnProperty.call(obj, key)) return;
 
     if (typeof value === "function") {
       // Some native APIs, like `NodeJS.EventEmitter['on']`, don't work in the Renderer process. Wrapping them into a function.
-      renderer[key] = (...args: unknown[]) => {
-        return value.call(renderer, ...args);
+      obj[key] = (...args: unknown[]) => {
+        return value.call(obj, ...args);
       };
     } else {
-      renderer[key] = value;
+      obj[key] = value;
     }
   });
-  return renderer;
+  return obj;
 }

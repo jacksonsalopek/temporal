@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from "electron";
+import { app, BrowserWindow, shell, ipcMain } from "electron";
 import { release } from "os";
 import { join } from "path";
 import "./samples/electron-store";
@@ -22,6 +22,24 @@ async function createWindow() {
     webPreferences: {
       preload: join(__dirname, "../preload/index.cjs"),
     },
+    width: 1300,
+    height: 900,
+    frame: false,
+  });
+
+  ipcMain.on("minimize", () => {
+    win?.isMinimized() ? win.restore() : win?.minimize();
+    // or alternatively: win.isVisible() ? win.hide() : win.show()
+  });
+
+  ipcMain.on("close", () => {
+    win?.close();
+    // or alternatively: win.isVisible() ? win.hide() : win.show()
+  });
+
+  ipcMain.on("maximize", () => {
+    win?.isMaximized() ? win.unmaximize() : win?.maximize();
+    // or alternatively: win.isVisible() ? win.hide() : win.show()
   });
 
   if (app.isPackaged) {
@@ -33,7 +51,7 @@ async function createWindow() {
     win.loadURL(url).then(() => {
       console.log("🚀 Loaded Vite URL");
     });
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
   }
 
   // Test active push message to Renderer-process
