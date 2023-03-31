@@ -161,15 +161,18 @@ const App: Component = () => {
 			</div>
 			<style jsx global>{`
 				/* Add global styles here */
+				body {
+					overflow: hidden;
+				}
 				.navbar-center {
 					-webkit-app-region: drag;
 					height: 32px;
 				}
+				#root>.mockup-window {
+					overflow: hidden;
+				}
 				#root>.mockup-window:before {
 					content: none;
-				}
-				#root>.mockup-window:before:hover {
-					box-shadow: 1.4em 0 0 0 red, 2.8em 0 0 0 yellow, 4.2em 0 0 0 green;
 				}
 				#window-buttons {
 					grid-template-columns: repeat(3, 1fr);
