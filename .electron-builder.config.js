@@ -3,9 +3,9 @@
  * @see https://www.electron.build/configuration/configuration
  */
 module.exports = {
-  appId: "YourAppID",
-  productName: "YourAppName",
-  copyright: "Copyright © 2022 ${author}",
+  appId: "com.teoti.temporal",
+  productName: "Temporal",
+  copyright: "Copyright © 2023 ${author}",
   asar: true,
   directories: {
     output: "release/${version}",
@@ -35,4 +35,4 @@ module.exports = {
     target: ["AppImage"],
     artifactName: "${productName}-${version}-Installer.${ext}",
   },
-}
+};

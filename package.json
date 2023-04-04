@@ -2,9 +2,9 @@
   "name": "@teoti/temporal",
   "productName": "Temporal",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "Budgeting app with a sense of time.",
-  "author": "jacksonsalopek <jackson.salopek@gmail.com>",
+  "author": "Teoti.io",
   "license": "MIT",
   "main": "dist/main/index.cjs",
   "scripts": {
