@@ -1,54 +1,97 @@
 import { createSignal, onMount } from "solid-js";
 
+/**
+ * @TODO - Replace this with the actual transaction type
+ */
 interface PLACEHOLDERTransaction {
 	id: string;
 	date: number;
+	amount: number;
 	type: "income" | "expense" | "calculation";
+
 	/**
 	 * The subtype of the transaction. For example, if the transaction is an income, the subtype could be "salary".
 	 * If the transaction is an expense, the subtype could be "Transfer", "Investment", etc.
 	 */
 	subtype: string;
-	amount: number;
+
+	/**
+	 * Calculation callback function. This function will be called with the transactions array pre-filtered by timestamp, using the current date.
+	 * @param transactions
+	 * @returns
+	 */
+	calculationFunction?: (transactions: PLACEHOLDERTransaction[]) => number;
 }
 
+/**
+ * Timeline component options
+ */
 export interface TimelineOptions {
 	layout: "horizontal" | "vertical";
 	transactions: PLACEHOLDERTransaction[];
 }
 
+/**
+ * Timeline component props
+ */
 export interface TimelineProps {
 	options?: TimelineOptions;
 }
 
+/**
+ * Timeline component
+ * @param props
+ * @returns
+ */
 export default function Timeline(props: TimelineProps) {
 	const [transactions, setTransactions] = createSignal<
 		Record<number, PLACEHOLDERTransaction[]>
 	>({});
+	// Used for date selection purposes
 	const [selectedDate, setSelectedDate] = createSignal<number | undefined>(
 		undefined,
 	);
+	// Used for calculating the moving totals
 	const [movingTotals, setMovingTotals] = createSignal<Record<number, number>>(
 		{},
 	);
 
-	const groupTransactionsByDate = (transactions: PLACEHOLDERTransaction[]) => {
+	/**
+	 * Group transactions by date
+	 * @param transactions the transactions to group
+	 * @returns {Record<number, PLACEHOLDERTransaction[]>} Record where the key is the date
+	 */
+	const groupTransactionsByDate = (
+		transactions: PLACEHOLDERTransaction[],
+	): Record<number, PLACEHOLDERTransaction[]> => {
 		const groupedTransactions: Record<number, PLACEHOLDERTransaction[]> = {};
-		transactions.forEach((transaction) => {
-			if (groupedTransactions[transaction.date]) {
-				groupedTransactions[transaction.date].push(transaction);
-			} else {
-				groupedTransactions[transaction.date] = [transaction];
-			}
-		});
+		transactions
+			.filter((t) => t.type !== "calculation")
+			.forEach((transaction) => {
+				if (groupedTransactions[transaction.date]) {
+					groupedTransactions[transaction.date].push(transaction);
+				} else {
+					groupedTransactions[transaction.date] = [transaction];
+				}
+			});
 		return groupedTransactions;
 	};
 
+	/**
+	 * Convert a timestamp to a date string
+	 * @param timestamp UNIX timestamp to convert
+	 * @returns timestamp as a date string
+	 */
 	const timestampToDateString = (timestamp: number) => {
 		const date = new Date(timestamp);
 		return `${date.getMonth() + 1}/${date.getDate()}`;
 	};
 
+	/**
+	 * Determine if a timestamp is today
+	 * @param timestamp UNIX timestamp to check
+	 * @returns if the timestamp is today
+	 */
 	const isToday = (timestamp: number): boolean => {
 		const date = new Date(timestamp);
 		const today = new Date();
@@ -59,6 +102,11 @@ export default function Timeline(props: TimelineProps) {
 		);
 	};
 
+	/**
+	 * Adds a new moving total to the moving totals object. Used in the `onMount` hook.
+	 * @param timestamp
+	 * @param amount
+	 */
 	const addMovingTotal = (timestamp: number, amount: number) => {
 		const newMovingTotals = { ...movingTotals() };
 		newMovingTotals[timestamp] = amount;
@@ -66,7 +114,10 @@ export default function Timeline(props: TimelineProps) {
 	};
 
 	onMount(() => {
+		// Group transactions by date and set the transactions signal
 		setTransactions(groupTransactionsByDate(props.options?.transactions ?? []));
+
+		// Calculate the moving totals
 		Object.keys(transactions()).forEach((timestamp) => {
 			const timestampNumber = +timestamp;
 			const transactionsForDate = transactions()[timestampNumber];
