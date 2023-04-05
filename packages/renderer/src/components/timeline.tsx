@@ -136,7 +136,13 @@ export default function Timeline(props: TimelineProps) {
 					props.options?.layout === "vertical" ? "y" : "x"
 				}-auto`}
 			>
-				<ul class={`steps steps-${props.options?.layout ?? "horizontal"}`}>
+				<ul
+					class={`steps ${
+						props.options?.layout === "horizontal"
+							? "steps-horizontal"
+							: "steps-vertical"
+					}`}
+				>
 					{Object.keys(transactions())
 						.sort((a, b) => +a - +b)
 						.map((transactionTimestamp) => {
