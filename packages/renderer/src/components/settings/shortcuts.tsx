@@ -1,3 +1,5 @@
+import { onCleanup } from "solid-js";
+
 export interface ShortcutsSettingsPageOptions {}
 
 export interface ShortcutsSettingsPageProps {}
@@ -5,6 +7,10 @@ export interface ShortcutsSettingsPageProps {}
 export default function ShortcutsSettingsPage(
 	props?: ShortcutsSettingsPageProps,
 ) {
+	onCleanup(() => {
+		console.log("ShortcutsSettingsPage saved.");
+	});
+
 	return (
 		<article class="prose">
 			<h2>Shortcuts</h2>

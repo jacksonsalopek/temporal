@@ -23,7 +23,9 @@ async function createWindow() {
       preload: join(__dirname, "../preload/index.cjs"),
     },
     width: 1300,
+    minWidth: 600,
     height: 900,
+    minHeight: 600,
     frame: false,
   });
 

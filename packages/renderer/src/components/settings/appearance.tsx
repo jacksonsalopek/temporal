@@ -1,3 +1,5 @@
+import { createSignal, onCleanup } from "solid-js";
+
 export interface AppearanceSettingsPageOptions {
 	theme: "light" | "dark";
 	fontSize: "small" | "medium" | "large";
@@ -10,6 +12,15 @@ export interface AppearanceSettingsPageProps {
 export default function AppearanceSettingsPage(
 	props?: AppearanceSettingsPageProps,
 ) {
+	const [theme, setTheme] = createSignal(props?.options?.theme ?? "dark");
+	const [fontSize, setFontSize] = createSignal(
+		props?.options?.fontSize ?? "medium",
+	);
+
+	onCleanup(() => {
+		console.log("AppearanceSettingsPage saved.");
+	});
+
 	return (
 		<article class="prose">
 			<h2>Appearance</h2>
@@ -24,7 +35,8 @@ export default function AppearanceSettingsPage(
 								class={`toggle${
 									props?.options?.theme === "dark" ? " toggle-accent" : ""
 								}`}
-								checked={props?.options?.theme === "dark"}
+								checked={theme() === "dark"}
+								onclick={() => setTheme(theme() === "dark" ? "light" : "dark")}
 							/>
 						</span>
 					</label>
@@ -37,21 +49,24 @@ export default function AppearanceSettingsPage(
 									name="font-size-small"
 									data-title="A"
 									class="btn"
-									checked={props?.options?.fontSize === "small"}
+									checked={fontSize() === "small"}
+									onclick={() => setFontSize("small")}
 								/>
 								<input
 									type="radio"
 									name="font-size-medium"
 									data-title="A"
 									class="btn"
-									checked={props?.options?.fontSize === "medium"}
+									checked={fontSize() === "medium"}
+									onclick={() => setFontSize("medium")}
 								/>
 								<input
 									type="radio"
 									name="font-size-large"
 									data-title="A"
 									class="btn"
-									checked={props?.options?.fontSize === "large"}
+									checked={fontSize() === "large"}
+									onclick={() => setFontSize("large")}
 								/>
 							</div>
 						</span>

@@ -106,6 +106,13 @@ export default function SettingsPage(props?: SettingsPageProps) {
 					<div class="card-body">{activeComponent()}</div>
 				</div>
 			</div>
+			<style jsx scoped>
+				{`
+				  article {
+						width: 100%;
+					}
+				`}
+			</style>
 		</div>
 	);
 }

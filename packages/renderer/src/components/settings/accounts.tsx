@@ -1,3 +1,5 @@
+import { onCleanup } from "solid-js";
+
 export interface AccountsSettingsPageOptions {}
 
 export interface AccountsSettingsPageProps {
@@ -7,6 +9,10 @@ export interface AccountsSettingsPageProps {
 export default function AccountsSettingsPage(
 	props?: AccountsSettingsPageProps,
 ) {
+	onCleanup(() => {
+		console.log("AccountSettingsPage saved.");
+	});
+
 	return (
 		<article class="prose">
 			<h2>Accounts</h2>
