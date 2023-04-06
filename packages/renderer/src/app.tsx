@@ -150,7 +150,7 @@ const App: Component = () => {
 						</li>
 						<div class="flex-grow bg-transparent"/>
 						<div class="divider" />
-							<li class="bottom-0">
+							<li>
 								<Link href="/settings">
 									<RiSystemSettings3Line /> Settings
 								</Link>
