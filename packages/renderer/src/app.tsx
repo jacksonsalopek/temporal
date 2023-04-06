@@ -148,7 +148,7 @@ const App: Component = () => {
 								Investments
 							</Link>
 						</li>
-						<div class="flex-grow"/>
+						<div class="flex-grow bg-transparent"/>
 						<div class="divider" />
 							<li class="bottom-0">
 								<Link href="/settings">
