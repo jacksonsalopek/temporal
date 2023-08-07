@@ -1,5 +1,5 @@
 import { Component, createSignal } from "solid-js";
-import { Link, useRoutes, useLocation } from "@solidjs/router";
+import { A, useRoutes, useLocation } from "@solidjs/router";
 import {
   RiSystemDashboardLine,
   RiBusinessCalendar2Line,
@@ -25,9 +25,9 @@ const App: Component = () => {
   const Route = useRoutes(routes);
   const initialWindowButtons = (
     <>
-      <FaSolidCircle size={12} class="window-button" />
-      <FaSolidCircle size={12} class="window-button" />
-      <FaSolidCircle size={12} class="window-button" />
+      <FaSolidCircle size={12} class="window-button" fill="currentcolor" />
+      <FaSolidCircle size={12} class="window-button" fill="currentcolor" />
+      <FaSolidCircle size={12} class="window-button" fill="currentcolor" />
     </>
   );
   const hoverWindowButtons = (
@@ -90,9 +90,17 @@ const App: Component = () => {
             }}
           >
             {sidebarOpen() ? (
-              <OcSidebarcollapse3 size={24} class="rotate-180" />
+              <OcSidebarcollapse3
+                size={24}
+                class="rotate-180"
+                fill="currentcolor"
+              />
             ) : (
-              <OcSidebarexpand3 size={24} class="rotate-180" />
+              <OcSidebarexpand3
+                size={24}
+                class="rotate-180"
+                fill="currentcolor"
+              />
             )}
           </button>
         </div>
@@ -126,34 +134,34 @@ const App: Component = () => {
           <label class="drawer-overlay" />
           <ul class="menu p-4 w-60 bg-base-100 text-base-content">
             <li>
-              <Link href="/">
+              <A href="/" end={true}>
                 <RiSystemDashboardLine /> Dashboard
-              </Link>
+              </A>
             </li>
             <li>
-              <Link href="/calendar">
+              <A href="/calendar">
                 <RiBusinessCalendar2Line />
                 Calendar
-              </Link>
+              </A>
             </li>
             <li>
-              <Link href="/timeline">
-                <FaSolidTimeline />
+              <A href="/timeline">
+                <FaSolidTimeline fill="currentcolor" />
                 Timeline
-              </Link>
+              </A>
             </li>
             <li>
-              <Link href="/investments">
+              <A href="/investments">
                 <RiBusinessLineChartLine />
                 Investments
-              </Link>
+              </A>
             </li>
             <div class="bottom-0">
               <div class="divider" />
               <li>
-                <Link href="/settings">
+                <A href="/settings">
                   <RiSystemSettings3Line /> Settings
-                </Link>
+                </A>
               </li>
             </div>
           </ul>
