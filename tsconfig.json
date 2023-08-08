@@ -14,7 +14,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["packages/renderer/src/*"]
+      "@/*": ["packages/renderer/src/*"],
+      "@shared/*": ["packages/shared/src/*"],
     }
   }
 }

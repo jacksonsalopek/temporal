@@ -7,54 +7,15 @@ import {
   RiSystemSettings3Line,
   RiSystemSearchEyeLine,
 } from "solid-icons/ri";
-import {
-  FaSolidCircle,
-  FaSolidCircleMinus,
-  FaSolidCirclePlus,
-  FaSolidCircleXmark,
-  FaSolidTimeline,
-} from "solid-icons/fa";
+import { FaSolidTimeline } from "solid-icons/fa";
 import { OcSidebarcollapse3, OcSidebarexpand3 } from "solid-icons/oc";
 
 import { routes } from "./routes";
 
 const App: Component = () => {
   const [sidebarOpen, setSidebarOpen] = createSignal(false);
-  const [hoveringWindowButtons, setHoveringWindowButtons] = createSignal(false);
   const location = useLocation();
   const Route = useRoutes(routes);
-  const initialWindowButtons = (
-    <>
-      <FaSolidCircle size={12} class="window-button" fill="currentcolor" />
-      <FaSolidCircle size={12} class="window-button" fill="currentcolor" />
-      <FaSolidCircle size={12} class="window-button" fill="currentcolor" />
-    </>
-  );
-  const hoverWindowButtons = (
-    <>
-      <FaSolidCircleXmark
-        size={12}
-        class="window-button fill-error"
-        onClick={() => {
-          window.electron.send("close");
-        }}
-      />
-      <FaSolidCircleMinus
-        size={12}
-        class="window-button fill-warning"
-        onClick={() => {
-          window.electron.send("minimize");
-        }}
-      />
-      <FaSolidCirclePlus
-        size={12}
-        class="window-button fill-success"
-        onClick={() => {
-          window.electron.send("maximize");
-        }}
-      />
-    </>
-  );
 
   const getNameFromPathname = (pathname: string) => {
     if (pathname === "/") {
@@ -66,18 +27,6 @@ const App: Component = () => {
 
   return (
     <div class="mockup-window bg-neutral">
-      <div
-        id="window-buttons"
-        class="grid gap-2 ml-4 mt-1.5"
-        onMouseEnter={(e) => {
-          setHoveringWindowButtons(true);
-        }}
-        onMouseLeave={(e) => {
-          setHoveringWindowButtons(false);
-        }}
-      >
-        {hoveringWindowButtons() ? hoverWindowButtons : initialWindowButtons}
-      </div>
       <div class="navbar bg-neutral text-primary-content pl-24 -my-5">
         <div class="flex-none">
           <button
