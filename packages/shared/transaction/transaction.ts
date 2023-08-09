@@ -1,10 +1,15 @@
-import { EventSourceInput } from '@fullcalendar/core';
+import { EventInput } from '@fullcalendar/core';
 import Holidays from '@18f/us-federal-holidays';
 import { RRule, RRuleSet } from 'rrule';
 
+export enum TemporalTransactionType {
+  CREDIT = 'CREDIT',
+  DEBIT = 'DEBIT',
+}
+
 export interface TemporalTransaction {
   id: string;
-  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
+  type: TemporalTransactionType;
   amount: number;
   date: Date;
   description: string;
@@ -40,6 +45,7 @@ export class TemporalTransactions {
 
   add(transaction: TemporalTransaction) {
     this.transactions.push(transaction);
+    return this;
   }
 
   getById(id: string) {
@@ -54,7 +60,26 @@ export class TemporalTransactions {
     );
   }
 
-  toCalendarEvents(): EventSourceInput {
+  getSubtotalInRange(startDate: Date, endDate: Date) {
+    return this.getInDateRange(startDate, endDate)
+      .toCalendarEvents()
+      .reduce((acc, event) => {
+        const parts = event.title?.split('$');
+        // rome-ignore lint/style/noNonNullAssertion: this is guaranteed to have a $ in it since we generated it
+        const amount = Number(parts![parts!.length - 1].slice(0, -1));
+
+        if (event.title?.charAt(event.title.lastIndexOf('$') - 1) === '-') {
+          return acc - amount;
+        }
+        return acc + amount;
+      }, 0);
+  }
+
+  getTransactions() {
+    return this.transactions;
+  }
+
+  toCalendarEvents(): EventInput[] {
     const bankHolidays = Holidays.allForYear(new Date().getFullYear()).map((holiday) => holiday.date.toISOString());
 
     function adjustForWeekendsAndHolidays(
@@ -73,7 +98,7 @@ export class TemporalTransactions {
 
     return this.transactions.flatMap((transaction) => {
       const amountDivCents = transaction.amount / 100;
-      const amount = `${amountDivCents >= 0 ? '$' : '-$'}${amountDivCents.toFixed(2)}`;
+      const amount = `${transaction.type === TemporalTransactionType.DEBIT ? '-$' : '$'}${amountDivCents.toFixed(2)}`;
 
       if (isRecurringTransaction(transaction)) {
         const ruleSet = new RRuleSet();

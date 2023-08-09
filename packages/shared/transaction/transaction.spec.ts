@@ -1,5 +1,10 @@
 import { EventInput } from '@fullcalendar/core';
-import { TemporalRecurringTransaction, TemporalTransaction, TemporalTransactions } from './transaction';
+import {
+  TemporalRecurringTransaction,
+  TemporalTransaction,
+  TemporalTransactionType,
+  TemporalTransactions,
+} from './transaction';
 
 describe('TemporalTransactions', () => {
   let transactions: TemporalTransactions;
@@ -15,7 +20,7 @@ describe('TemporalTransactions', () => {
   it('should add a transaction', () => {
     const transaction: TemporalTransaction = {
       id: '1',
-      type: 'INCOME',
+      type: TemporalTransactionType.CREDIT,
       amount: 100,
       date: new Date(),
       description: 'Test',
@@ -30,7 +35,7 @@ describe('TemporalTransactions', () => {
   it('should add a recurring transaction', () => {
     const recurring: TemporalRecurringTransaction = {
       id: '1',
-      type: 'INCOME',
+      type: TemporalTransactionType.CREDIT,
       amount: 100,
       date: new Date(),
       description: 'Test',
@@ -46,7 +51,7 @@ describe('TemporalTransactions', () => {
   it('should get transactions in date range', () => {
     const oldTransaction: TemporalTransaction = {
       id: '0',
-      type: 'INCOME',
+      type: TemporalTransactionType.CREDIT,
       amount: 100,
       date: new Date(1000),
       description: 'Test',
@@ -54,7 +59,7 @@ describe('TemporalTransactions', () => {
     };
     const transaction: TemporalTransaction = {
       id: '1',
-      type: 'INCOME',
+      type: TemporalTransactionType.CREDIT,
       amount: 100,
       date: new Date(),
       description: 'Test',
@@ -81,7 +86,7 @@ describe('TemporalTransactions', () => {
   it('should get recurring transactions in date range', () => {
     const recurring: TemporalRecurringTransaction = {
       id: '1',
-      type: 'INCOME',
+      type: TemporalTransactionType.CREDIT,
       amount: 100,
       date: new Date(),
       description: 'Test',
@@ -102,5 +107,33 @@ describe('TemporalTransactions', () => {
     expect(events.every((event) => (event.start as Date).getDay() !== 6 && (event.start as Date).getDay() !== 0)).toBe(
       true,
     );
+  });
+
+  it('should get subtotal in date range', () => {
+    const oldTransaction: TemporalTransaction = {
+      id: '0',
+      type: TemporalTransactionType.CREDIT,
+      amount: 100,
+      date: new Date(),
+      description: 'Test',
+      tags: [],
+    };
+    const transaction: TemporalTransaction = {
+      id: '1',
+      type: TemporalTransactionType.DEBIT,
+      amount: 100,
+      date: new Date(),
+      description: 'Test',
+      tags: [],
+    };
+
+    transactions.add(oldTransaction);
+    transactions.add(transaction);
+
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate() + 1);
+
+    expect(transactions.getSubtotalInRange(startDate, endDate)).toBe(0);
   });
 });

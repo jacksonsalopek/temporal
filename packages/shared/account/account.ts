@@ -27,6 +27,19 @@ export class TemporalAccounts {
     });
   }
 
+  public addTransactionToAccount(accountId: string, transaction: TemporalTransaction): void {
+    this.accounts = this.accounts.map((account) => {
+      if (account.id === accountId) {
+        return {
+          ...account,
+          transactions: account.transactions.add(transaction),
+        };
+      }
+
+      return account;
+    });
+  }
+
   public getAccountById(id: string): TemporalAccount<TemporalTransactions> | undefined {
     return this.accounts.find((account) => account.id === id);
   }
@@ -37,6 +50,14 @@ export class TemporalAccounts {
 
   public getAccounts(): TemporalAccount<TemporalTransactions>[] {
     return this.accounts;
+  }
+
+  public getAllTransactions(): TemporalTransactions {
+    return new TemporalTransactions(
+      this.accounts.reduce((acc, account) => {
+        return [...acc, ...account.transactions.getTransactions()];
+      }, [] as TemporalTransaction[]),
+    );
   }
 
   public removeAccount(id: string): void {
