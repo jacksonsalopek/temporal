@@ -7,6 +7,8 @@
     "skipDefaultLibCheck": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
     "strict": true,
     "jsx": "preserve",

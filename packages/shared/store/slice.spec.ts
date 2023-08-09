@@ -17,7 +17,7 @@ export type ExampleSliceState = {
 @Slice({
   name: 'example',
   description: 'Example slice of state',
-  slices: [],
+  actions: ExampleSliceActions,
 })
 export class ExampleSlice extends StateSlice<ExampleSliceState> {
   public static initialState: ExampleSliceState = {
@@ -48,7 +48,7 @@ export class ExampleSlice extends StateSlice<ExampleSliceState> {
 @Slice({
   name: 'root',
   description: 'Root slice of state',
-  slices: [ExampleSlice],
+  refs: [ExampleSlice],
 })
 export class RootSlice extends StateSlice {
   public static initialState = {};
@@ -119,6 +119,6 @@ describe('Slice', () => {
     }
     reducer({ example: 'test2' });
     slice.getReducer(ExampleSliceActions.SET_EXAMPLE)({ example: 'test1' });
-    expect(rootSlice.getSlice('example')?.getExample()).toBe('test2');
+    expect(rootSlice.getSlice('example')?.getExample()).toBe('test1');
   });
 });

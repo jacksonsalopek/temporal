@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "node scripts/watch.mjs",
     "build": "npm run typecheck && node scripts/build.mjs && electron-builder --config .electron-builder.config.js",
+    "coverage:unit": "jest --config config/test/unit.ts --coverage",
     "format": "rome format --write packages/**/*.ts",
     "lint": "rome check packages/**/*.ts",
     "lint:fix": "rome check --apply packages/**/*.ts",
