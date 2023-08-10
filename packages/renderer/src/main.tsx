@@ -1,11 +1,13 @@
 /* @refresh reload */
-import "tailwindcss/tailwind.css";
-import "./samples/electron-store";
+import { StoreProvider } from "@shared/ssd";
+import { Router, createIntegration } from "@solidjs/router";
 import { onMount } from "solid-js";
 import { render } from "solid-js/web";
-import { Router, createIntegration } from "@solidjs/router";
 import type {} from "solid-styled-jsx";
+import "tailwindcss/tailwind.css";
 import App from "./app";
+import "./samples/electron-store";
+import { RootStore } from "./store/root.store";
 
 function bindEvent(target: EventTarget, type: string, handler: EventListener) {
   target.addEventListener(type, handler);
@@ -39,7 +41,9 @@ render(() => {
 
   return (
     <Router source={electronIntegration()}>
-      <App />
+      <StoreProvider store={RootStore}>
+        <App />
+      </StoreProvider>
     </Router>
   );
 }, document.getElementById("root") as HTMLElement);

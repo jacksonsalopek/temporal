@@ -1,12 +1,12 @@
 import 'reflect-metadata';
-import { StateSliceConstructor } from './slice';
+import { SSDSliceConstructor } from './slice';
 
 export function Reducer(metadata: {
   action: string;
   description: string;
 }) {
   return function (target: Object, propertyKey: string) {
-    const ctor = target.constructor as StateSliceConstructor;
+    const ctor = target.constructor as SSDSliceConstructor;
     if (!ctor._reducers) {
       ctor._reducers = {};
     }

@@ -1,4 +1,4 @@
-import { TemporalTransaction, TemporalTransactions } from '../transaction';
+import { TemporalTransaction, TemporalTransactions } from '../transactions';
 
 export interface TemporalAccount<TxType = TemporalTransaction[]> {
   id: string;

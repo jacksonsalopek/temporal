@@ -35,6 +35,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': join(__dirname, 'src'),
+      '@shared': join(__dirname, '../shared'),
     },
   },
   server: {

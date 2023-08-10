@@ -1,19 +1,19 @@
 import { SetStoreFunction, createStore } from 'solid-js/store';
 import { Constructor } from './types';
 
-export interface StateSliceConstructor extends Function {
+export interface SSDSliceConstructor extends Function {
   _reducers?: { [rAction: string]: string | symbol };
   _selectors?: { [sAction: string]: string | symbol };
 }
 
-export class StateSlice<T extends object = {}> {
+export class SSDSlice<T extends object = {}> {
   // rome-ignore lint/suspicious/noExplicitAny: allow any such that we index by any key
   [key: string]: any;
 
   public _name = '';
   public _description?: string;
   // rome-ignore lint/suspicious/noExplicitAny: allow any such that we can use any slice as a subslice
-  public _refs?: StateSlice<any>[];
+  public _refs?: SSDSlice<any>[];
   public _actions?: string[];
 
   private _setState: SetStoreFunction<T>;
@@ -23,8 +23,8 @@ export class StateSlice<T extends object = {}> {
     const [state, setState] = createStore<T>(initialState);
     this._state = state;
     this._setState = setState;
-    this._reducers = { ...((this.constructor as StateSliceConstructor)._reducers || {}) };
-    this._selectors = { ...((this.constructor as StateSliceConstructor)._selectors || {}) };
+    this._reducers = { ...((this.constructor as SSDSliceConstructor)._reducers || {}) };
+    this._selectors = { ...((this.constructor as SSDSliceConstructor)._selectors || {}) };
   }
 
   get<K extends keyof T>(key: K): T[K] {
@@ -69,8 +69,9 @@ export class StateSlice<T extends object = {}> {
     return selectors.map((selector) => this.getSelector(selector));
   }
 
-  getSlice(name: string): StateSlice | undefined {
-    return this._refs?.find((slice) => slice._name === name);
+  getSlice<T extends SSDSlice = SSDSlice>(name: string): (T extends SSDSlice ? T : SSDSlice) | undefined {
+    // rome-ignore lint/suspicious/noExplicitAny: allow any to suppress invalid type
+    return this._refs?.find((slice) => slice._name === name) as any;
   }
 }
 
@@ -86,14 +87,16 @@ export class StateSlice<T extends object = {}> {
 export function Slice(metadata: {
   name: string;
   actions?: Object;
+  selectors?: Object;
   description?: string;
-  refs?: Constructor<StateSlice>[];
+  refs?: Constructor<SSDSlice>[];
 }) {
   // rome-ignore lint/suspicious/noExplicitAny: allow any for now
   // rome-ignore lint/suspicious/noShadowRestrictedNames: allow shadowing of metadata
-  return function <T extends Constructor<StateSlice>>(constructor: T, ...rootArgs: any[]) {
+  return function <T extends Constructor<SSDSlice>>(constructor: T, ...rootArgs: any[]) {
     return class extends constructor {
       // rome-ignore lint/suspicious/noExplicitAny: constructor is a generic type
+      // rome-ignore lint/correctness/noUnreachableSuper: this is reachable, but rome doesn't know it
       constructor(...args: any[]) {
         super(...args);
         this._name = metadata.name;
@@ -107,6 +110,15 @@ export function Slice(metadata: {
             .map((key) => (metadata.actions as any)[key]);
 
           this._actions = enumValues; // This will log all values from the enum
+        }
+        if (metadata.selectors) {
+          // Retrieve all values from the enum
+          const enumValues = Object.keys(metadata.selectors)
+            .filter((key) => isNaN(Number(key))) // Filter out numeric keys
+            // rome-ignore lint/suspicious/noExplicitAny: get rid of Object type error
+            .map((key) => (metadata.selectors as any)[key]);
+
+          this._selectors = enumValues; // This will log all values from the enum
         }
       }
     };

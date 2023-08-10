@@ -10,10 +10,16 @@ import {
 import { FaSolidTimeline } from "solid-icons/fa";
 import { OcSidebarcollapse3, OcSidebarexpand3 } from "solid-icons/oc";
 
+import { useSSD } from "@shared/ssd";
+import { LayoutSlice } from "@/store/layout";
 import { routes } from "./routes";
 
 const App: Component = () => {
-  const [sidebarOpen, setSidebarOpen] = createSignal(false);
+  const store = useSSD();
+
+  const layoutSlice = store?.refs.layout as LayoutSlice;
+  const isSidebarVisible = () => layoutSlice.isSidebarVisible();
+
   const location = useLocation();
   const Route = useRoutes(routes);
 
@@ -35,10 +41,10 @@ const App: Component = () => {
             type="button"
             onClick={() => {
               document.getElementById("my-drawer")?.click();
-              setSidebarOpen(!sidebarOpen());
+              layoutSlice.toggleSidebar();
             }}
           >
-            {sidebarOpen() ? (
+            {isSidebarVisible() ? (
               <OcSidebarcollapse3
                 size={24}
                 class="rotate-180"
@@ -64,6 +70,7 @@ const App: Component = () => {
               <button
                 class="btn btn-square bg-base-100 border-none"
                 title="Search button"
+                type="button"
               >
                 <RiSystemSearchEyeLine size={24} />
               </button>

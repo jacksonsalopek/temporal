@@ -1,7 +1,7 @@
-import { Slice, StateSlice } from './slice';
+import { SSDSlice, Slice } from './slice';
 import { Reducer } from './reducer';
 import { Selector } from './selector';
-import { StateStore, Store } from './store';
+import { SSDStore, Store } from './store';
 
 export enum ExampleSliceActions {
   SET_EXAMPLE = 'SET_EXAMPLE',
@@ -20,7 +20,7 @@ export type ExampleSliceState = {
   description: 'Example slice of state',
   actions: ExampleSliceActions,
 })
-export class ExampleSlice extends StateSlice<ExampleSliceState> {
+export class ExampleSlice extends SSDSlice<ExampleSliceState> {
   public static initialState: ExampleSliceState = {
     example: 'example',
   };
@@ -38,7 +38,7 @@ export class ExampleSlice extends StateSlice<ExampleSliceState> {
   }
 
   @Selector({
-    action: ExampleSliceSelectors.GET_EXAMPLE,
+    selector: ExampleSliceSelectors.GET_EXAMPLE,
     description: 'Gets the example value',
   })
   getExample() {
@@ -50,7 +50,7 @@ export class ExampleSlice extends StateSlice<ExampleSliceState> {
   name: 'root',
   refs: [ExampleSlice],
 })
-export class RootStore extends StateStore {}
+export class RootStore extends SSDStore {}
 
 describe('Store', () => {
   let store: RootStore;

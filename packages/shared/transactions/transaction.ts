@@ -48,6 +48,20 @@ export class TemporalTransactions {
     return this;
   }
 
+  remove(id: string) {
+    this.transactions = this.transactions.filter((transaction) => transaction.id !== id);
+    return this;
+  }
+
+  edit(id: string, transaction: Partial<TemporalTransaction>) {
+    const index = this.transactions.findIndex((transaction) => transaction.id === id);
+    this.transactions[index] = {
+      ...this.transactions[index],
+      ...transaction,
+    };
+    return this;
+  }
+
   getById(id: string) {
     return this.transactions.find((transaction) => transaction.id === id);
   }

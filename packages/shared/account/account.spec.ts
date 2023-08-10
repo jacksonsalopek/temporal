@@ -1,4 +1,4 @@
-import { TemporalTransactionType } from '../transaction';
+import { TemporalTransactionType } from '../transactions';
 import { TemporalAccounts } from './account';
 
 describe('TemporalAccounts', () => {
