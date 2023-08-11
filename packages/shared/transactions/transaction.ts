@@ -67,7 +67,7 @@ export class TemporalTransactions {
   }
 
   getInDateRange(startDate: Date, endDate: Date): TemporalTransactions {
-    const inRangeTransactions: TemporalTransaction[] = this.transactions.flatMap((transaction) => {
+    const inRangeTransactions: TemporalTransaction[] = this.getTransactions().flatMap((transaction) => {
       if (isRecurringTransaction(transaction)) {
         const ruleSet = new RRuleSet();
         const rule = RRule.fromString(transaction.rule);
@@ -111,6 +111,7 @@ export class TemporalTransactions {
     if (this.transactions.length === 0) {
       return [
         {
+          id: '1',
           date: new Date(),
           description: 'Test Transaction #1',
           type: TemporalTransactionType.CREDIT,
@@ -118,6 +119,7 @@ export class TemporalTransactions {
           tags: ['test', 'test2'],
         },
         {
+          id: '2',
           date: new Date(),
           description: 'Test Transaction #2',
           type: TemporalTransactionType.DEBIT,
@@ -140,6 +142,7 @@ export class TemporalTransactions {
         title: `${transaction.description} (${amount})`,
         start: transaction.date,
         allDay: true,
+        color: transaction.type === TemporalTransactionType.DEBIT ? 'hsl(var(--er))' : 'hsl(var(--su))',
       };
     });
   }

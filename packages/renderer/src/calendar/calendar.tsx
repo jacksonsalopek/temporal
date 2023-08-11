@@ -5,12 +5,20 @@ import rrulePlugin from "@fullcalendar/rrule";
 import "@fullcalendar/web-component/global";
 import type { FullCalendarElement } from "@fullcalendar/web-component";
 import { createSignal, onMount } from "solid-js";
+import { useSSD } from "@shared/ssd";
+import { TransactionsSlice } from "@/store/transactions";
 
 interface CalendarProps {
   options?: CalendarOptions;
 }
 
 export default function Calendar(props: CalendarProps) {
+  const store = useSSD();
+  const transactionsSlice = store?.refs.transactions as TransactionsSlice;
+
+  const today = new Date();
+  const year = 365 * 24 * 60 * 60 * 1000;
+
   const [calendarEl, setCalendarEl] = createSignal<
     FullCalendarElement | undefined
   >(undefined);
@@ -26,6 +34,16 @@ export default function Calendar(props: CalendarProps) {
   const calendarResizeHandler: CalendarOptions["windowResize"] = (instance) => {
     instance.view.calendar.updateSize();
   };
+
+  console.log(
+    transactionsSlice
+      .getInRange({
+        // Start date is 1 year ago
+        startDate: new Date(+today - year),
+        endDate: new Date(+today + year),
+      })
+      ?.toCalendarEvents()
+  );
 
   const defaultOptions: CalendarOptions = {
     initialView: "dayGridMonth",
@@ -43,6 +61,13 @@ export default function Calendar(props: CalendarProps) {
       console.info("select", date);
     },
     windowResize: calendarResizeHandler,
+    events: transactionsSlice
+      .getInRange({
+        // Start date is 1 year ago
+        startDate: new Date(+today - year),
+        endDate: new Date(+today + year),
+      })
+      ?.toCalendarEvents(),
   };
 
   onMount(() => {
