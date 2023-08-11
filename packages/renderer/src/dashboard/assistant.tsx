@@ -1,6 +1,13 @@
 import { RiBusinessSendPlane2Fill } from "solid-icons/ri";
 import { createSignal } from "solid-js";
 import { TemporalAssistantMessage } from "./dashboard.types";
+import { styled } from "solid-styled-components";
+
+export const AssistantCard = styled("div")`
+  margin: 24px;
+  border: 1px solid hsl(var(--b3));
+  height: calc(100% - 186px);
+`;
 
 export default function Assistant() {
   const [assistantMessages, setAssistantMessages] = createSignal<
@@ -38,7 +45,7 @@ export default function Assistant() {
   };
 
   return (
-    <div class="card bg-base-100 shadow-xl">
+    <AssistantCard class="card bg-base-100 shadow-xl">
       <div class="card-body">
         <h2 class="card-title">Ask Assistant</h2>
         <div class="assistant-window h-full">
@@ -86,6 +93,6 @@ export default function Assistant() {
           </div>
         </div>
       </div>
-    </div>
+    </AssistantCard>
   );
 }

@@ -76,7 +76,7 @@ describe('TemporalTransactions', () => {
     expect(transactions.getInDateRange(startDate, endDate).toCalendarEvents()).toEqual([
       {
         id: '1',
-        title: 'Test ($1.00)',
+        title: 'Test ($100.00)',
         start: transaction.date,
         allDay: true,
       },
@@ -99,7 +99,7 @@ describe('TemporalTransactions', () => {
     transactions.add(recurring);
 
     const startDate = new Date();
-    const endDate = new Date(+startDate + 1000 * 60 * 60 * 24 * 365 * 10);
+    const endDate = new Date(+startDate + 1000 * 60 * 60 * 24 * 365);
 
     const events = transactions.getInDateRange(startDate, endDate).toCalendarEvents() as EventInput[];
     expect(events.length).toBe(24);

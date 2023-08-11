@@ -66,12 +66,29 @@ export class TemporalTransactions {
     return this.transactions.find((transaction) => transaction.id === id);
   }
 
-  getInDateRange(startDate: Date, endDate: Date) {
-    return new TemporalTransactions(
-      this.transactions.filter((transaction) => {
-        return transaction.date >= startDate && transaction.date <= endDate;
-      }),
-    );
+  getInDateRange(startDate: Date, endDate: Date): TemporalTransactions {
+    const inRangeTransactions: TemporalTransaction[] = this.transactions.flatMap((transaction) => {
+      if (isRecurringTransaction(transaction)) {
+        const ruleSet = new RRuleSet();
+        const rule = RRule.fromString(transaction.rule);
+        ruleSet.rrule(rule);
+
+        const dates = ruleSet.between(startDate, endDate);
+        const adjustedDates = dates.map((date) =>
+          this.adjustForWeekendsAndHolidays(date, transaction.canOccurOnWeekends, transaction.canOccurOnHolidays),
+        );
+
+        // For each adjusted date within the range, return a separate transaction
+        return adjustedDates.map((date) => ({
+          ...transaction,
+          date,
+        }));
+      } else {
+        return transaction.date >= startDate && transaction.date <= endDate ? [transaction] : [];
+      }
+    });
+
+    return new TemporalTransactions(inRangeTransactions);
   }
 
   getSubtotalInRange(startDate: Date, endDate: Date) {
@@ -90,51 +107,33 @@ export class TemporalTransactions {
   }
 
   getTransactions() {
+    // @TODO Remove this as it's a mock
+    if (this.transactions.length === 0) {
+      return [
+        {
+          date: new Date(),
+          description: 'Test Transaction #1',
+          type: TemporalTransactionType.CREDIT,
+          amount: 100,
+          tags: ['test', 'test2'],
+        },
+        {
+          date: new Date(),
+          description: 'Test Transaction #2',
+          type: TemporalTransactionType.DEBIT,
+          amount: 20.54,
+          tags: ['test', 'test2'],
+        },
+      ];
+    }
     return this.transactions;
   }
 
   toCalendarEvents(): EventInput[] {
-    const bankHolidays = Holidays.allForYear(new Date().getFullYear()).map((holiday) => holiday.date.toISOString());
-
-    function adjustForWeekendsAndHolidays(
-      date: Date,
-      canOccurOnWeekends?: boolean,
-      canOccurOnHolidays?: boolean,
-    ): Date {
-      while (
-        (!canOccurOnWeekends && (date.getDay() === 6 || date.getDay() === 0)) ||
-        (!canOccurOnHolidays && bankHolidays.includes(date.toISOString()))
-      ) {
-        date.setDate(date.getDate() - 1);
-      }
-      return date;
-    }
-
-    return this.transactions.flatMap((transaction) => {
-      const amountDivCents = transaction.amount / 100;
-      const amount = `${transaction.type === TemporalTransactionType.DEBIT ? '-$' : '$'}${amountDivCents.toFixed(2)}`;
-
-      if (isRecurringTransaction(transaction)) {
-        const ruleSet = new RRuleSet();
-        const rule = RRule.fromString(transaction.rule);
-        ruleSet.rrule(rule);
-
-        // Adjust dates for bank holidays and weekends
-        const dates = ruleSet.all((date, i) => i < 24);
-        const adjustedDates = dates.map((date) =>
-          adjustForWeekendsAndHolidays(date, transaction.canOccurOnWeekends, transaction.canOccurOnHolidays),
-        );
-
-        // map adjusted dates to event and return
-        return adjustedDates.map((date) => {
-          return {
-            id: transaction.id,
-            title: `${transaction.description} (${amount})`,
-            start: date,
-            allDay: true,
-          };
-        });
-      }
+    return this.transactions.map((transaction) => {
+      const amount = `${transaction.type === TemporalTransactionType.DEBIT ? '-$' : '$'}${transaction.amount.toFixed(
+        2,
+      )}`;
 
       return {
         id: transaction.id,
@@ -149,5 +148,17 @@ export class TemporalTransactions {
     return new TemporalTransactions(
       this.transactions.filter((transaction) => transaction[key as keyof TemporalTransaction] === value),
     );
+  }
+
+  adjustForWeekendsAndHolidays(date: Date, canOccurOnWeekends?: boolean, canOccurOnHolidays?: boolean): Date {
+    const bankHolidays = Holidays.allForYear(new Date().getFullYear()).map((holiday) => holiday.date.toISOString());
+
+    while (
+      (!canOccurOnWeekends && (date.getDay() === 6 || date.getDay() === 0)) ||
+      (!canOccurOnHolidays && bankHolidays.includes(date.toISOString()))
+    ) {
+      date.setDate(date.getDate() - 1);
+    }
+    return date;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js";
+import { Component } from "solid-js";
 import { A, useRoutes, useLocation } from "@solidjs/router";
 import {
   RiSystemDashboardLine,
@@ -13,6 +13,12 @@ import { OcSidebarcollapse3, OcSidebarexpand3 } from "solid-icons/oc";
 import { useSSD } from "@shared/ssd";
 import { LayoutSlice } from "@/store/layout";
 import { routes } from "./routes";
+import { styled } from "solid-styled-components";
+
+export const AppMain = styled("main")`
+  height: calc(100% - 64px);
+  margin: 24px;
+`;
 
 const App: Component = () => {
   const store = useSSD();
@@ -82,9 +88,9 @@ const App: Component = () => {
       <div class="drawer mt-5">
         <input id="my-drawer" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content">
-          <main>
+          <AppMain>
             <Route />
-          </main>
+          </AppMain>
         </div>
         <div class="drawer-side">
           <label class="drawer-overlay" />
