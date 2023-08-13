@@ -10,6 +10,8 @@ export enum DashboardActions {
   REMOVE_ADD_TRANSACTION_FORM_TAG = 'REMOVE_ADD_TRANSACTION_FORM_TAG',
   TOGGLE_FAB = 'TOGGLE_FAB',
   TOGGLE_ADD_TRANSACTION_MODAL = 'TOGGLE_ADD_TRANSACTION_MODAL',
+  TOGGLE_GET_SUBTOTAL_ON_DATE_MODAL = 'TOGGLE_GET_SUBTOTAL_ON_DATE_MODAL',
+  SET_GET_SUBTOTAL_ON_DATE_MODAL_DATE = 'SET_GET_SUBTOTAL_ON_DATE_MODAL_DATE',
   SET_ADD_TRANSACTION_FORM_DATE = 'SET_ADD_TRANSACTION_FORM_DATE',
   SET_ADD_TRANSACTION_FORM_AMOUNT = 'SET_ADD_TRANSACTION_FORM_AMOUNT',
   SET_ADD_TRANSACTION_FORM_DESCRIPTION = 'SET_ADD_TRANSACTION_FORM_DESCRIPTION',
@@ -20,12 +22,18 @@ export enum DashboardActions {
   SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_WEEKENDS = 'SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_WEEKENDS',
   SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_HOLIDAYS = 'SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_HOLIDAYS',
   PROGRESS_OR_SUBMIT_ADD_TRANSACTION_FORM = 'PROGRESS_OR_SUBMIT_ADD_TRANSACTION_FORM',
+  SUBMIT_GET_SUBTOTAL_ON_DATE_FORM = 'SUBMIT_GET_SUBTOTAL_ON_DATE_FORM',
 }
 
 export enum DashboardSelectors {
   GET_STATS = 'GET_STATS',
   GET_IS_FAB_TOGGLED = 'GET_IS_FAB_TOGGLED',
   GET_IS_ADD_TRANSACTION_MODAL_OPEN = 'GET_IS_ADD_TRANSACTION_MODAL_OPEN',
+  GET_IS_GET_SUBTOTAL_ON_DATE_MODAL_OPEN = 'GET_IS_GET_SUBTOTAL_ON_DATE_MODAL_OPEN',
+  GET_GET_SUBTOTAL_ON_DATE_FORM_DATA = 'GET_GET_SUBTOTAL_ON_DATE_FORM_DATA',
+  GET_GET_SUBTOTAL_ON_DATE_FORM_DATE = 'GET_GET_SUBTOTAL_ON_DATE_FORM_DATE',
+  GET_IS_GET_SUBTOTAL_ON_DATE_FORM_VALID = 'GET_IS_GET_SUBTOTAL_ON_DATE_FORM_VALID',
+  GET_IS_GET_SUBTOTAL_ON_DATE_FORM_COMPLETE = 'GET_IS_GET_SUBTOTAL_ON_DATE_FORM_COMPLETE',
   GET_ADD_TRANSACTION_FORM_DATA = 'GET_ADD_TRANSACTION_FORM_DATA',
   GET_ADD_TRANSACTION_FORM_DATE = 'GET_ADD_TRANSACTION_FORM_DATE',
   GET_ADD_TRANSACTION_FORM_AMOUNT = 'GET_ADD_TRANSACTION_FORM_AMOUNT',
@@ -45,14 +53,20 @@ export type AddTransactionFormData = Omit<Partial<TemporalRecurringTransaction>,
   amount?: string;
 };
 
+export type GetSubtotalOnDateFormData = Partial<{ date: Date }>;
+
 export type DashboardState = {
   isFABToggled: boolean;
   isAddTransactionModalOpen: boolean;
+  isGetSubtotalOnDateModalOpen: boolean;
   addTransactionFormState?: 'notstarted' | 'incomplete' | 'valid' | 'complete';
   addTransactionForm?: {
     step: number;
     recurring?: boolean;
     data: AddTransactionFormData;
+  };
+  getSubtotalOnDateForm?: {
+    data: GetSubtotalOnDateFormData;
   };
 };
 
@@ -66,6 +80,7 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
   public static initialState: DashboardState = {
     isFABToggled: false,
     isAddTransactionModalOpen: false,
+    isGetSubtotalOnDateModalOpen: false,
     addTransactionFormState: 'notstarted',
   };
 
@@ -153,6 +168,14 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
     return this.get('isAddTransactionModalOpen');
   }
 
+  @Selector({
+    selector: DashboardSelectors.GET_IS_GET_SUBTOTAL_ON_DATE_MODAL_OPEN,
+    description: 'Get whether the Get Subtotal On Date modal is open',
+  })
+  isGetSubtotalOnDateModalOpen(): boolean {
+    return this.get('isGetSubtotalOnDateModalOpen');
+  }
+
   @Reducer({
     action: DashboardActions.TOGGLE_FAB,
     description: 'Toggle the Floating Action Button menu visibility',
@@ -173,13 +196,13 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
       modal.style.visibility = 'visible';
       modal.style.opacity = '1';
       modal.style.pointerEvents = 'auto';
-      const s = this.set.bind(this);
+      const set = this.set.bind(this);
       document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
           modal.style.visibility = 'hidden';
           modal.style.opacity = '0';
           modal.style.pointerEvents = 'none';
-          s('isAddTransactionModalOpen', false);
+          set('isAddTransactionModalOpen', false);
         }
       });
       this.set('addTransactionForm', {
@@ -194,6 +217,90 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
       modal.close();
     }
     this.set('isAddTransactionModalOpen', !isOpen);
+  }
+
+  @Reducer({
+    action: DashboardActions.TOGGLE_GET_SUBTOTAL_ON_DATE_MODAL,
+    description: 'Toggle the Get Subtotal On Date modal visibility',
+  })
+  toggleGetSubtotalOnDateModal(): void {
+    const isOpen = this.isGetSubtotalOnDateModalOpen();
+    const modal = document.getElementById('dashboard-get-subtotal-modal') as HTMLDialogElement;
+    if (!isOpen) {
+      modal.showModal();
+      modal.style.visibility = 'visible';
+      modal.style.opacity = '1';
+      modal.style.pointerEvents = 'auto';
+      const set = this.set.bind(this);
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          modal.style.visibility = 'hidden';
+          modal.style.opacity = '0';
+          modal.style.pointerEvents = 'none';
+          set('isGetSubtotalOnDateModalOpen', false);
+        }
+      });
+      this.set('getSubtotalOnDateForm', {
+        data: {},
+      });
+    } else {
+      modal.style.visibility = 'hidden';
+      modal.style.opacity = '0';
+      modal.style.pointerEvents = 'none';
+      this.set('getSubtotalOnDateForm', undefined);
+      modal.close();
+    }
+    this.set('isGetSubtotalOnDateModalOpen', !isOpen);
+  }
+
+  @Selector({
+    selector: DashboardSelectors.GET_GET_SUBTOTAL_ON_DATE_FORM_DATA,
+    description: 'Get the Get Subtotal On Date form data',
+  })
+  getGetSubtotalOnDateFormData(): GetSubtotalOnDateFormData | undefined {
+    return this.get('getSubtotalOnDateForm')?.data;
+  }
+
+  @Selector({
+    selector: DashboardSelectors.GET_GET_SUBTOTAL_ON_DATE_FORM_DATE,
+    description: 'Get the Get Subtotal On Date form date',
+  })
+  getGetSubtotalOnDateFormDate(): Date | undefined {
+    return this.get('getSubtotalOnDateForm')?.data?.date;
+  }
+
+  @Reducer({
+    action: DashboardActions.SET_GET_SUBTOTAL_ON_DATE_MODAL_DATE,
+    description: 'Set the Get Subtotal On Date form date',
+  })
+  setGetSubtotalOnDateFormDate(date: Date | undefined): void {
+    const form = this.get('getSubtotalOnDateForm');
+    if (!form) return;
+    this.set('getSubtotalOnDateForm', {
+      ...form,
+      data: {
+        ...form.data,
+        date,
+      },
+    });
+  }
+
+  @Selector({
+    selector: DashboardSelectors.GET_IS_GET_SUBTOTAL_ON_DATE_FORM_VALID,
+    description: 'Validate the Get Subtotal On Date form',
+  })
+  isGetSubtotalOnDateFormValid(): boolean {
+    const form = this.get('getSubtotalOnDateForm');
+    return !!form?.data?.date;
+  }
+
+  @Selector({
+    selector: DashboardSelectors.GET_IS_GET_SUBTOTAL_ON_DATE_FORM_COMPLETE,
+    description: 'Check if the Get Subtotal On Date form is complete',
+  })
+  isGetSubtotalOnDateFormComplete(): boolean {
+    const form = this.get('getSubtotalOnDateForm');
+    return !!form?.data?.date;
   }
 
   @Selector({

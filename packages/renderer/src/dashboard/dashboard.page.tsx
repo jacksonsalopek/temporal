@@ -3,11 +3,13 @@ import { useSSD } from "@shared/ssd";
 import { TEMPORAL_NINETY_DAYS } from "@shared/constants";
 import {
   FaSolidCalendarPlus,
+  FaSolidCalendarDay,
   FaSolidCashRegister,
   FaSolidFileInvoiceDollar,
   FaSolidMinus,
   FaSolidMoneyCheckDollar,
   FaSolidPlus,
+  FaSolidMoneyBill1Wave,
 } from "solid-icons/fa";
 import {
   RiBusinessCalendarLine,
@@ -19,7 +21,7 @@ import AddTransactionForm from "./add-transaction-form/add-transaction-form";
 import TransactionsTable from "./transactions-table";
 import { createSignal } from "solid-js";
 import { TransactionsSlice } from "@/store/transactions";
-import { get } from "http";
+import GetSubtotalOnDateForm from "./get-subtotal-on-date-form/get-subtotal-on-date-form";
 
 export const StatsContainer = styled("div")`
   display: grid;
@@ -229,6 +231,26 @@ export default function Dashboard() {
           </a>
         </li>
         <li>
+          <a
+            // rome-ignore lint/a11y/useValidAnchor: state handles this, not href
+            onClick={() => {
+              dashboardSlice.toggleGetSubtotalOnDateModal();
+              dashboardSlice.toggleFAB();
+            }}
+          >
+            <FaSolidCalendarDay size={24} fill="currentcolor" /> Get Subtotal
+            On...
+          </a>
+        </li>
+        <li class="divider" />
+        <li>
+          {/* rome-ignore lint/a11y/useValidAnchor: this doesn't redirect (necessarily) */}
+          <a>
+            <FaSolidMoneyBill1Wave size={24} fill="currentcolor" /> Add Initial
+            Balance
+          </a>
+        </li>
+        <li>
           {/* rome-ignore lint/a11y/useValidAnchor: this doesn't redirect (necessarily) */}
           <a>
             <RiBusinessLineChartLine size={24} fill="currentcolor" /> Track
@@ -275,6 +297,33 @@ export default function Dashboard() {
               type="button"
               class="btn"
               onClick={() => dashboardSlice.toggleAddTransactionModal()}
+            >
+              Close
+            </button>
+          </div>
+        </form>
+      </AddTransactionDialog>
+
+      <AddTransactionDialog id="dashboard-get-subtotal-modal" class="modal">
+        <form method="dialog" class="modal-box">
+          <h3 class="font-bold text-lg">Get Subtotal On Date</h3>
+          <div class="divider" />
+          <GetSubtotalOnDateForm />
+          <div class="modal-action">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onClick={() =>
+                dashboardSlice.setGetSubtotalOnDateFormDate(undefined)
+              }
+              disabled={!dashboardSlice.getGetSubtotalOnDateFormDate()}
+            >
+              Recalculate
+            </button>
+            <button
+              type="button"
+              class="btn"
+              onClick={() => dashboardSlice.toggleGetSubtotalOnDateModal()}
             >
               Close
             </button>
