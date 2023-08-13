@@ -15,6 +15,7 @@ import {
 } from "solid-icons/ri";
 import { styled } from "solid-styled-components";
 import TransactionsTable from "./transactions-table";
+import AddTransactionForm from "./add-transaction-form/add-transaction-form";
 
 export const StatsContainer = styled("div")`
   display: grid;
@@ -77,7 +78,7 @@ export default function Dashboard() {
 
   const dashboardSlice = store?.refs.dashboard as DashboardSlice;
   const stats = () => dashboardSlice.getStats();
-  const isFABToggled = () => dashboardSlice.getIsFABToggled();
+  const isFABToggled = () => dashboardSlice.isFABToggled();
 
   return (
     <>
@@ -229,68 +230,16 @@ export default function Dashboard() {
       <AddTransactionDialog id="dashboard-add-transaction-modal" class="modal">
         <form method="dialog" class="modal-box">
           <h3 class="font-bold text-lg">Add New Transaction</h3>
-          <div class="form-control w-full max-w-xs">
-            <label class="label">
-              <span class="label-text">Type</span>
-            </label>
-            <div class="btn-group">
-              <CreditRadioBtn
-                type="radio"
-                name="credit"
-                data-title="Credit"
-                class="btn bg-success text-black border-none"
-              />
-              <DebitRadioBtn
-                type="radio"
-                name="debit"
-                data-title="Debit"
-                class="btn bg-error text-black border-none"
-              />
-            </div>
-          </div>
-          <div class="form-control w-full max-w-xs">
-            <label class="label">
-              <span class="label-text">Description</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Short description (e.g. 'Mortgage')"
-              class="input input-bordered w-full max-w-xs"
-            />
-          </div>
-          <div class="form-control w-full max-w-xs">
-            <label class="label">
-              <span class="label-text">Amount</span>
-            </label>
-            <input
-              type="number"
-              placeholder="Tx amount (e.g. 26.54)"
-              class="input input-bordered w-full max-w-xs"
-              step="0.01"
-              pattern="^\d*(\.\d{0,2})?$"
-              onChange={(e) => {
-                const target = e.target as HTMLInputElement;
-                target.value = parseFloat(target.value).toFixed(2);
-              }}
-            />
-          </div>
-          <div class="form-control w-full max-w-xs">
-            <label class="label">
-              <span class="label-text">Tags</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Enter one at a time, then press enter"
-              class="input input-bordered w-full max-w-xs"
-            />
-          </div>
+          <div class="divider" />
+          <AddTransactionForm />
           <div class="modal-action">
             <button
               type="button"
               class="btn btn-primary"
-              onClick={() => dashboardSlice.toggleAddTransactionModal()}
+              onClick={() => dashboardSlice.progressOrSubmitAddTransactionForm()}
+              disabled={!dashboardSlice.isAddTransactionFormValid()}
             >
-              Add Tx
+              {dashboardSlice.isAddTransactionFormComplete() ? 'Add Tx' : 'Next'}
             </button>
             <button
               type="button"

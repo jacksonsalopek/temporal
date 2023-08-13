@@ -41,6 +41,9 @@ dependencies:
   solid-icons:
     specifier: ^1.0.11
     version: 1.0.11(solid-js@1.7.9)
+  solid-simple-datepicker:
+    specifier: ^1.0.2
+    version: 1.0.2(solid-js@1.7.9)
   solid-styled-components:
     specifier: ^0.28.5
     version: 0.28.5(solid-js@1.7.9)
@@ -6547,6 +6550,14 @@ packages:
       '@babel/types': 7.22.10
       solid-js: 1.7.9
     dev: true
+
+  /solid-simple-datepicker@1.0.2(solid-js@1.7.9):
+    resolution: {integrity: sha512-DcVvN1HR5dewY+D1vAH/nEGRTSQJspKPovVbk0IR420JbsgRqnw559uJjMzm+HQWIhSszW5mS8Zv5sDMtRhqQg==}
+    peerDependencies:
+      solid-js: ^1.7
+    dependencies:
+      solid-js: 1.7.9
+    dev: false
 
   /solid-styled-components@0.28.5(solid-js@1.7.9):
     resolution: {integrity: sha512-vwTcdp76wZNnESIzB6rRZ3U55NgcSAQXCiiRIiEFhxTFqT0bEh/warNT1qaRZu4OkAzrBkViOngF35ktI8sc4A==}

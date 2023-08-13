@@ -36,6 +36,7 @@
     "reflect-metadata": "^0.1.13",
     "rrule": "^2.7.2",
     "solid-icons": "^1.0.11",
+    "solid-simple-datepicker": "^1.0.2",
     "solid-styled-components": "^0.28.5"
   },
   "packageManager": "pnpm@8.0.0",
