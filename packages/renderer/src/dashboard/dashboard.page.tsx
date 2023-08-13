@@ -1,12 +1,13 @@
 import { DashboardSlice } from "@/store/dashboard";
 import { useSSD } from "@shared/ssd";
+import { TEMPORAL_NINETY_DAYS } from "@shared/constants";
 import {
-  FaSolidFileInvoiceDollar,
-  FaSolidMoneyCheckDollar,
-  FaSolidCashRegister,
-  FaSolidPlus,
-  FaSolidMinus,
   FaSolidCalendarPlus,
+  FaSolidCashRegister,
+  FaSolidFileInvoiceDollar,
+  FaSolidMinus,
+  FaSolidMoneyCheckDollar,
+  FaSolidPlus,
 } from "solid-icons/fa";
 import {
   RiBusinessCalendarLine,
@@ -14,8 +15,11 @@ import {
   RiFinanceShoppingBasket2Fill,
 } from "solid-icons/ri";
 import { styled } from "solid-styled-components";
-import TransactionsTable from "./transactions-table";
 import AddTransactionForm from "./add-transaction-form/add-transaction-form";
+import TransactionsTable from "./transactions-table";
+import { createSignal } from "solid-js";
+import { TransactionsSlice } from "@/store/transactions";
+import { get } from "http";
 
 export const StatsContainer = styled("div")`
   display: grid;
@@ -77,8 +81,28 @@ export default function Dashboard() {
   const store = useSSD();
 
   const dashboardSlice = store?.refs.dashboard as DashboardSlice;
-  const stats = () => dashboardSlice.getStats();
+  const transactionsSlice = store?.refs.transactions as TransactionsSlice;
   const isFABToggled = () => dashboardSlice.isFABToggled();
+
+  const handleFormCompletion = (complete: boolean) => {
+    if (complete) {
+      setStats(dashboardSlice.getStats());
+      setTransactions(getTransactions());
+    }
+  };
+
+  const [stats, setStats] = createSignal(dashboardSlice.getStats());
+
+  const today = new Date();
+  const getTransactions = () =>
+    transactionsSlice
+      .getInRange({
+        startDate: today,
+        endDate: new Date(+today + TEMPORAL_NINETY_DAYS),
+      })
+      ?.getTransactions()
+      .sort((a, b) => +a.date - +b.date) ?? [];
+  const [transactions, setTransactions] = createSignal(getTransactions());
 
   return (
     <>
@@ -89,9 +113,9 @@ export default function Dashboard() {
           </div>
           <div class="stat-title">Transactions</div>
           <div class="stat-value">
-            {stats()?.numTransactionsInLastThirtyDays}
+            {stats()?.numTransactionsInNextNinetyDays}
           </div>
-          <div class="stat-desc">Last 30 days</div>
+          <div class="stat-desc">In next 90 days</div>
         </div>
 
         <div class="stat">
@@ -184,7 +208,7 @@ export default function Dashboard() {
         </div>
       </StatsContainer>
 
-      <TransactionsTable />
+      <TransactionsTable transactions={transactions()} />
 
       <FloatingActionMenu
         isToggled={isFABToggled()}
@@ -236,10 +260,16 @@ export default function Dashboard() {
             <button
               type="button"
               class="btn btn-primary"
-              onClick={() => dashboardSlice.progressOrSubmitAddTransactionForm()}
+              onClick={() =>
+                handleFormCompletion(
+                  dashboardSlice.progressOrSubmitAddTransactionForm()
+                )
+              }
               disabled={!dashboardSlice.isAddTransactionFormValid()}
             >
-              {dashboardSlice.isAddTransactionFormComplete() ? 'Add Tx' : 'Next'}
+              {dashboardSlice.isAddTransactionFormComplete()
+                ? "Add Tx"
+                : "Next"}
             </button>
             <button
               type="button"

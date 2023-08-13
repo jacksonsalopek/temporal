@@ -44,7 +44,7 @@ export class TemporalTransactions {
   }
 
   add(transaction: TemporalTransaction) {
-    this.transactions.push(transaction);
+    this.transactions = [...this.transactions, transaction];
     return this;
   }
 
@@ -108,26 +108,26 @@ export class TemporalTransactions {
 
   getTransactions() {
     // @TODO Remove this as it's a mock
-    if (this.transactions.length === 0) {
-      return [
-        {
-          id: '1',
-          date: new Date(),
-          description: 'Test Transaction #1',
-          type: TemporalTransactionType.CREDIT,
-          amount: 100,
-          tags: ['test', 'test2'],
-        },
-        {
-          id: '2',
-          date: new Date(),
-          description: 'Test Transaction #2',
-          type: TemporalTransactionType.DEBIT,
-          amount: 20.54,
-          tags: ['test', 'test2'],
-        },
-      ];
-    }
+    // if (this.transactions.length === 0) {
+    //   return [
+    //     {
+    //       id: '1',
+    //       date: new Date(),
+    //       description: 'Test Transaction #1',
+    //       type: TemporalTransactionType.CREDIT,
+    //       amount: 100,
+    //       tags: ['test', 'test2'],
+    //     },
+    //     {
+    //       id: '2',
+    //       date: new Date(),
+    //       description: 'Test Transaction #2',
+    //       type: TemporalTransactionType.DEBIT,
+    //       amount: 20.54,
+    //       tags: ['test', 'test2'],
+    //     },
+    //   ];
+    // }
     return this.transactions;
   }
 

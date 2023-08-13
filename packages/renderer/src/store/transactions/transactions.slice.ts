@@ -41,7 +41,7 @@ export class TransactionsSlice extends SSDSlice<TransactionsState> {
     description: 'Get all transactions',
   })
   getAll() {
-    return this.get('transactions')?.getTransactions() ?? [];
+    return this.get('transactions')?.getTransactions();
   }
 
   @Selector({
@@ -65,7 +65,7 @@ export class TransactionsSlice extends SSDSlice<TransactionsState> {
     description: 'Get subtotal in date range',
   })
   getSubtotalInRange(payload: { startDate: Date; endDate: Date }) {
-    return this.get('transactions')?.getSubtotalInRange(payload.startDate, payload.endDate) ?? 0;
+    return this.get('transactions')?.getSubtotalInRange(payload.startDate, payload.endDate);
   }
 
   @Selector({
@@ -73,7 +73,7 @@ export class TransactionsSlice extends SSDSlice<TransactionsState> {
     description: 'Get transactions as calendar events',
   })
   asEvents() {
-    return this.get('transactions')?.toCalendarEvents() ?? [];
+    return this.get('transactions')?.toCalendarEvents();
   }
 
   @Selector({

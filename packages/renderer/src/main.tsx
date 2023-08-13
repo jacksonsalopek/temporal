@@ -36,7 +36,9 @@ function electronIntegration() {
 
 render(() => {
   onMount(() => {
-    window.removeLoading();
+    try {
+      window.removeLoading();
+    } catch (e) {}
   });
 
   return (

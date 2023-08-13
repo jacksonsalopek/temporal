@@ -3,6 +3,7 @@ import { Reducer, SSDSlice, Selector, Slice } from '@shared/ssd';
 import { TemporalRecurringTransaction, TemporalTransaction, TemporalTransactionType } from '@shared/transactions';
 import { v4 } from 'uuid';
 import { TransactionsSlice } from '../transactions/transactions.slice';
+import { TEMPORAL_NINETY_DAYS } from '@shared/constants';
 
 export enum DashboardActions {
   PUSH_ADD_TRANSACTION_FORM_TAG = 'PUSH_ADD_TRANSACTION_FORM_TAG',
@@ -47,6 +48,7 @@ export type AddTransactionFormData = Omit<Partial<TemporalRecurringTransaction>,
 export type DashboardState = {
   isFABToggled: boolean;
   isAddTransactionModalOpen: boolean;
+  addTransactionFormState?: 'notstarted' | 'incomplete' | 'valid' | 'complete';
   addTransactionForm?: {
     step: number;
     recurring?: boolean;
@@ -64,6 +66,7 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
   public static initialState: DashboardState = {
     isFABToggled: false,
     isAddTransactionModalOpen: false,
+    addTransactionFormState: 'notstarted',
   };
 
   constructor() {
@@ -78,7 +81,7 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
     const transactionsSlice = this.getSlice<TransactionsSlice>('transactions');
     if (!transactionsSlice)
       return {
-        numTransactionsInLastThirtyDays: 0,
+        numTransactionsInNextNinetyDays: 0,
         income: {
           next: 'N/A',
           in: NaN,
@@ -94,12 +97,12 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
       };
 
     const today = new Date();
-    const thirtyDaysAgo = new Date(today.getDate() - 30);
-    const numTransactionsInLastThirtyDays =
+    const ninetyDays = new Date(+today + TEMPORAL_NINETY_DAYS);
+    const numTransactionsInNextNinetyDays =
       transactionsSlice
         .getInRange({
-          startDate: thirtyDaysAgo,
-          endDate: today,
+          startDate: today,
+          endDate: ninetyDays,
         })
         ?.getTransactions().length ?? 0;
 
@@ -116,7 +119,7 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
     });
 
     const stats: TemporalDashboardStats = {
-      numTransactionsInLastThirtyDays,
+      numTransactionsInNextNinetyDays,
       income: {
         next: formattedNextIncomeDate,
         in: 2,
@@ -365,7 +368,8 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
       !!form?.data?.amount &&
       !!form?.data?.type &&
       !!form?.data?.description &&
-      !!form?.data?.tags
+      !!form?.data?.tags &&
+      form?.step === 3
     );
   }
 
@@ -499,21 +503,20 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
 
   @Reducer({
     action: DashboardActions.PROGRESS_OR_SUBMIT_ADD_TRANSACTION_FORM,
-    description: 'Progress or submit the Add Transaction form',
+    description: 'Progress or submit the Add Transaction form. Returns whether the form was submitted.',
   })
-  progressOrSubmitAddTransactionForm(): void {
+  progressOrSubmitAddTransactionForm(): boolean {
     const form = this.get('addTransactionForm');
-    console.log('addTransactionForm', form);
-    if (!form) return;
+    if (!form) return false;
 
     const step = form.step;
     if (this.isAddTransactionFormComplete()) {
-      const formData: TemporalTransaction = {
+      let formData: TemporalRecurringTransaction | TemporalTransaction = {
         id: v4(),
         // rome-ignore lint/style/noNonNullAssertion: we have already checked that the form is complete
         type: form.data.type!,
         // rome-ignore lint/style/noNonNullAssertion: see above
-        amount: parseFloat(form.data.amount?.substring(1)!),
+        amount: parseFloat(form.data.amount!),
         // rome-ignore lint/style/noNonNullAssertion: see above
         description: form.data.description!,
         // rome-ignore lint/style/noNonNullAssertion: see above
@@ -521,12 +524,25 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
         // rome-ignore lint/style/noNonNullAssertion: see above
         tags: form.data.tags!,
       };
+      if (form.recurring) {
+        formData = {
+          ...formData,
+          // rome-ignore lint/style/noNonNullAssertion: see above
+          rule: form.data.rule!,
+          // rome-ignore lint/style/noNonNullAssertion: see above
+          canOccurOnWeekends: form.data.canOccurOnWeekends!,
+          // rome-ignore lint/style/noNonNullAssertion: see above
+          canOccurOnHolidays: form.data.canOccurOnHolidays!,
+        };
+      }
+
       const transactionsSlice = this.getSlice<TransactionsSlice>('transactions');
       if (!transactionsSlice) throw new Error('TransactionsSlice not found!');
       transactionsSlice.add(formData);
       this.set('addTransactionForm', undefined);
+      this.set('addTransactionFormState', 'complete');
       this.toggleAddTransactionModal();
-      return;
+      return true;
     }
 
     if (this.isAddTransactionFormValid()) {
@@ -535,5 +551,6 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
         step: step + 1,
       });
     }
+    return false;
   }
 }

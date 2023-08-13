@@ -35,16 +35,6 @@ export default function Calendar(props: CalendarProps) {
     instance.view.calendar.updateSize();
   };
 
-  console.log(
-    transactionsSlice
-      .getInRange({
-        // Start date is 1 year ago
-        startDate: new Date(+today - year),
-        endDate: new Date(+today + year),
-      })
-      ?.toCalendarEvents()
-  );
-
   const defaultOptions: CalendarOptions = {
     initialView: "dayGridMonth",
     plugins: [dayGridPlugin, interactionPlugin, rrulePlugin],
@@ -101,8 +91,6 @@ export default function Calendar(props: CalendarProps) {
         "fc-today-button"
       )[0] as HTMLButtonElement;
       todayButton.classList.add("btn");
-
-      console.info("Loaded calendar");
     }
   });
 

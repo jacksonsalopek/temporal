@@ -1,5 +1,5 @@
 export interface TemporalDashboardStats {
-  numTransactionsInLastThirtyDays: number;
+  numTransactionsInNextNinetyDays: number;
   income: {
     /**
      * Date of next income, format MM/DD

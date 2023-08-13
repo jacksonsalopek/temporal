@@ -31,13 +31,16 @@
     "@fullcalendar/rrule": "^6.1.8",
     "@fullcalendar/web-component": "^6.1.8",
     "@solidjs/router": "^0.8.2",
+    "@types/node": "18",
+    "@types/uuid": "^9.0.2",
     "daisyui": "^2.51.5",
     "electron-store": "^8.1.0",
     "reflect-metadata": "^0.1.13",
     "rrule": "^2.7.2",
     "solid-icons": "^1.0.11",
     "solid-simple-datepicker": "^1.0.2",
-    "solid-styled-components": "^0.28.5"
+    "solid-styled-components": "^0.28.5",
+    "uuid": "^9.0.0"
   },
   "packageManager": "pnpm@8.0.0",
   "devDependencies": {
