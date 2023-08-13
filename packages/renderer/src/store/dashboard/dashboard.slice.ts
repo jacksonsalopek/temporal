@@ -1,6 +1,6 @@
 import { TemporalDashboardStats } from '@/dashboard/dashboard.types';
 import { Reducer, SSDSlice, Selector, Slice } from '@shared/ssd';
-import { TemporalTransaction, TemporalTransactionType } from '@shared/transactions';
+import { TemporalRecurringTransaction, TemporalTransaction, TemporalTransactionType } from '@shared/transactions';
 import { v4 } from 'uuid';
 import { TransactionsSlice } from '../transactions/transactions.slice';
 
@@ -14,6 +14,10 @@ export enum DashboardActions {
   SET_ADD_TRANSACTION_FORM_DESCRIPTION = 'SET_ADD_TRANSACTION_FORM_DESCRIPTION',
   SET_ADD_TRANSACTION_FORM_TAGS = 'SET_ADD_TRANSACTION_FORM_TAGS',
   SET_ADD_TRANSACTION_FORM_TYPE = 'SET_ADD_TRANSACTION_FORM_TYPE',
+  SET_ADD_TRANSACTION_FORM_RECURRING = 'SET_ADD_TRANSACTION_FORM_RECURRING',
+  SET_ADD_TRANSACTION_FORM_RECURRING_RULE = 'SET_ADD_TRANSACTION_FORM_RECURRING_RULE',
+  SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_WEEKENDS = 'SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_WEEKENDS',
+  SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_HOLIDAYS = 'SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_HOLIDAYS',
   PROGRESS_OR_SUBMIT_ADD_TRANSACTION_FORM = 'PROGRESS_OR_SUBMIT_ADD_TRANSACTION_FORM',
 }
 
@@ -28,17 +32,24 @@ export enum DashboardSelectors {
   GET_ADD_TRANSACTION_FORM_TAGS = 'GET_ADD_TRANSACTION_FORM_TAGS',
   GET_ADD_TRANSACTION_FORM_TYPE = 'GET_ADD_TRANSACTION_FORM_TYPE',
   GET_ADD_TRANSACTION_FORM_STEP = 'GET_ADD_TRANSACTION_FORM_STEP',
+  GET_ADD_TRANSACTION_FORM_RECURRING = 'GET_ADD_TRANSACTION_FORM_RECURRING',
+  GET_ADD_TRANSACTION_FORM_RECURRING_RULE = 'GET_ADD_TRANSACTION_FORM_RECURRING_RULE',
+  GET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_WEEKENDS = 'GET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_WEEKENDS',
+  GET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_HOLIDAYS = 'GET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_HOLIDAYS',
   GET_IS_ADD_TRANSACTION_FORM_VALID = 'GET_IS_ADD_TRANSACTION_FORM_VALID',
   GET_IS_ADD_TRANSACTION_FORM_COMPLETE = 'GET_IS_ADD_TRANSACTION_FORM_COMPLETE',
 }
 
-export type AddTransactionFormData = Omit<Partial<TemporalTransaction>, 'amount'> & { amount?: string };
+export type AddTransactionFormData = Omit<Partial<TemporalRecurringTransaction>, 'amount'> & {
+  amount?: string;
+};
 
 export type DashboardState = {
   isFABToggled: boolean;
   isAddTransactionModalOpen: boolean;
   addTransactionForm?: {
     step: number;
+    recurring?: boolean;
     data: AddTransactionFormData;
   };
 };
@@ -223,6 +234,99 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
   }
 
   @Selector({
+    selector: DashboardSelectors.GET_ADD_TRANSACTION_FORM_RECURRING,
+    description: 'Get the Add Transaction form recurring',
+  })
+  getAddTransactionFormRecurring(): boolean | undefined {
+    return this.get('addTransactionForm')?.recurring;
+  }
+
+  @Reducer({
+    action: DashboardActions.SET_ADD_TRANSACTION_FORM_RECURRING,
+    description: 'Set the Add Transaction form recurring',
+  })
+  setAddTransactionFormRecurring(recurring: boolean): void {
+    const form = this.get('addTransactionForm');
+    if (!form) return;
+    this.set('addTransactionForm', {
+      ...form,
+      recurring,
+    });
+  }
+
+  @Selector({
+    selector: DashboardSelectors.GET_ADD_TRANSACTION_FORM_RECURRING_RULE,
+    description: 'Get the Add Transaction form recurring rule',
+  })
+  getAddTransactionFormRecurringRule(): string | undefined {
+    return this.get('addTransactionForm')?.data?.rule;
+  }
+
+  @Reducer({
+    action: DashboardActions.SET_ADD_TRANSACTION_FORM_RECURRING_RULE,
+    description: 'Set the Add Transaction form recurring rule',
+  })
+  setAddTransactionFormRecurringRule(rule: string): void {
+    const form = this.get('addTransactionForm');
+    if (!form) return;
+    this.set('addTransactionForm', {
+      ...form,
+      data: {
+        ...form.data,
+        rule,
+      },
+    });
+  }
+
+  @Selector({
+    selector: DashboardSelectors.GET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_WEEKENDS,
+    description: 'Get the Add Transaction form recurring can occur on weekends',
+  })
+  getAddTransactionFormCanOccurOnWeekends(): boolean | undefined {
+    return this.get('addTransactionForm')?.data?.canOccurOnWeekends;
+  }
+
+  @Reducer({
+    action: DashboardActions.SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_WEEKENDS,
+    description: 'Set the Add Transaction form recurring can occur on weekends',
+  })
+  setAddTransactionFormCanOccurOnWeekends(canOccurOnWeekends: boolean): void {
+    const form = this.get('addTransactionForm');
+    if (!form) return;
+    this.set('addTransactionForm', {
+      ...form,
+      data: {
+        ...form.data,
+        canOccurOnWeekends,
+      },
+    });
+  }
+
+  @Selector({
+    selector: DashboardSelectors.GET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_HOLIDAYS,
+    description: 'Get the Add Transaction form recurring can occur on holidays',
+  })
+  getAddTransactionFormCanOccurOnHolidays(): boolean | undefined {
+    return this.get('addTransactionForm')?.data?.canOccurOnHolidays;
+  }
+
+  @Reducer({
+    action: DashboardActions.SET_ADD_TRANSACTION_FORM_RECURRING_CAN_OCCUR_ON_HOLIDAYS,
+    description: 'Set the Add Transaction form recurring can occur on holidays',
+  })
+  setAddTransactionFormCanOccurOnHolidays(canOccurOnHolidays: boolean): void {
+    const form = this.get('addTransactionForm');
+    if (!form) return;
+    this.set('addTransactionForm', {
+      ...form,
+      data: {
+        ...form.data,
+        canOccurOnHolidays,
+      },
+    });
+  }
+
+  @Selector({
     selector: DashboardSelectors.GET_IS_ADD_TRANSACTION_FORM_VALID,
     description: 'Validate the Add Transaction form',
   })
@@ -236,6 +340,8 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
         return !!form?.data?.date;
       // Step 2: Transaction details
       case 1:
+        if (form?.recurring)
+          return !!form?.data?.amount && !!form?.data?.type && !!form?.data?.description && !!form?.data?.rule;
         return !!form?.data?.amount && !!form?.data?.type && !!form?.data?.description;
       // Step 3: Transaction tags
       case 2:
@@ -397,6 +503,7 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
   })
   progressOrSubmitAddTransactionForm(): void {
     const form = this.get('addTransactionForm');
+    console.log('addTransactionForm', form);
     if (!form) return;
 
     const step = form.step;
