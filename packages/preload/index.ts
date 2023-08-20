@@ -15,18 +15,27 @@ const { appendLoading, removeLoading } = useLoading();
 contextBridge.exposeInMainWorld('removeLoading', removeLoading);
 contextBridge.exposeInMainWorld('ipcRenderer', withPrototype(ipcRenderer));
 contextBridge.exposeInMainWorld('electron', {
-  on(eventName, callback) {
+  on(eventName: string, callback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) {
     ipcRenderer.on(eventName, callback);
   },
 
-  async invoke(eventName, ...params) {
+  async invoke(eventName: string, ...params: unknown[]) {
     return await ipcRenderer.invoke(eventName, ...params);
   },
 
-  send(eventName, ...params) {
+  send(eventName: string, ...params: unknown[]) {
     ipcRenderer.send(eventName, ...params);
   },
 });
+
+async function loadState() {
+  const transactions = await ipcRenderer.invoke('electron-store', 'get', 'transactions');
+  contextBridge.exposeInMainWorld('loadedState', {
+    transactions: transactions,
+  });
+}
+
+loadState();
 
 // `exposeInMainWorld` can't detect attributes and methods of `prototype`, manually patching it.
 function withPrototype(obj: Object) {

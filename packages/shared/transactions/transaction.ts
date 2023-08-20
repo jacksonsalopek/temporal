@@ -39,8 +39,13 @@ export class TemporalTransactions {
   }
 
   static fromString(json: string) {
-    const transactions = JSON.parse(json);
-    return new TemporalTransactions(transactions);
+    // Have to double unwrap for some reason
+    const data = JSON.parse(JSON.parse(json));
+    return new TemporalTransactions(data.transactions);
+  }
+
+  toJSON() {
+    return JSON.stringify({ transactions: this.transactions });
   }
 
   add(transaction: TemporalTransaction) {

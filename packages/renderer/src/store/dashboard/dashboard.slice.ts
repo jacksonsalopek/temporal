@@ -1,9 +1,9 @@
 import { TemporalDashboardStats } from '@/dashboard/dashboard.types';
+import { TEMPORAL_NINETY_DAYS } from '@shared/constants';
 import { Reducer, SSDSlice, Selector, Slice } from '@shared/ssd';
 import { TemporalRecurringTransaction, TemporalTransaction, TemporalTransactionType } from '@shared/transactions';
 import { v4 } from 'uuid';
 import { TransactionsSlice } from '../transactions/transactions.slice';
-import { TEMPORAL_NINETY_DAYS } from '@shared/constants';
 
 export enum DashboardActions {
   PUSH_ADD_TRANSACTION_FORM_TAG = 'PUSH_ADD_TRANSACTION_FORM_TAG',
@@ -95,21 +95,7 @@ export class DashboardSlice extends SSDSlice<DashboardState> {
   getStats(): TemporalDashboardStats {
     const transactionsSlice = this.getSlice<TransactionsSlice>('transactions');
     if (!transactionsSlice)
-      return {
-        numTransactionsInNextNinetyDays: 0,
-        income: {
-          next: 'N/A',
-          in: NaN,
-          monthlyAmount: NaN,
-          prevMonthlyAmount: NaN,
-        },
-        expense: {
-          next: 'N/A',
-          in: NaN,
-          monthlyAmount: NaN,
-          prevMonthlyAmount: NaN,
-        },
-      };
+      throw new Error('TransactionsSlice not found! (DashboardSlice.getStats() -> transactionsSlice)');
 
     const today = new Date();
     const ninetyDays = new Date(+today + TEMPORAL_NINETY_DAYS);

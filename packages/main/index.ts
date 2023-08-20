@@ -1,7 +1,7 @@
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { release } from 'os';
 import { join } from 'path';
-import './samples/electron-store';
+import './electron-store';
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration();
@@ -50,7 +50,7 @@ async function createWindow() {
     win.loadFile(join(__dirname, '../renderer/index.html'));
   } else {
     // 🚧 Use ['ENV_NAME'] avoid vite:define plugin
-    const url = `http://localhost:${process.env['VITE_DEV_SERVER_PORT']}`;
+    const url = `http://localhost:${process.env.VITE_DEV_SERVER_PORT}`;
 
     win.loadURL(url).then(() => {
       console.log('🚀 Loaded Vite URL');

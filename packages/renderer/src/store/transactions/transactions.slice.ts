@@ -1,5 +1,6 @@
 import { SSDSlice, Slice, Reducer, Selector } from '@shared/ssd';
 import { TemporalTransaction, TemporalTransactions } from '@shared/transactions';
+import { ElectronStore } from '../electron.store';
 
 export enum TransactionsActions {
   ADD_TRANSACTION = 'ADD_TRANSACTION',
@@ -18,6 +19,7 @@ export enum TransactionsSelectors {
 
 export interface TransactionsState {
   transactions?: TemporalTransactions;
+  electronStore?: ElectronStore;
 }
 
 @Slice({
@@ -27,13 +29,25 @@ export interface TransactionsState {
   selectors: TransactionsSelectors,
 })
 export class TransactionsSlice extends SSDSlice<TransactionsState> {
+  public static TRANSACTIONS_ELECTRON_STORE_KEY = 'transactions';
+
   public static initialState: TransactionsState = {
     transactions: new TemporalTransactions(),
+    electronStore: new ElectronStore(),
   };
 
   constructor() {
-    // @TODO load transactions from disk
+    // If there is a transactions string on the window, parse the transactions and set it as the initial state.
+    if (window.loadedState?.transactions) {
+      TransactionsSlice.initialState.transactions = TemporalTransactions.fromString(window.loadedState.transactions);
+      console.log(TransactionsSlice.initialState.transactions.getTransactions().length);
+    }
     super(TransactionsSlice.initialState);
+  }
+
+  override set<K extends keyof TransactionsSlice>(key: K, value: TransactionsSlice[K]) {
+    this._setState(key as TransactionsSlice[K], value);
+    this._state.electronStore?.set(TransactionsSlice.TRANSACTIONS_ELECTRON_STORE_KEY, this._state.transactions);
   }
 
   @Selector({

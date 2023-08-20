@@ -16,8 +16,8 @@ export class SSDSlice<T extends object = {}> {
   public _refs?: SSDSlice<any>[];
   public _actions?: string[];
 
-  private _setState: SetStoreFunction<T>;
-  private _state: T;
+  protected _setState: SetStoreFunction<T>;
+  protected _state: T;
 
   constructor(initialState: T) {
     const [state, setState] = createStore<T>(initialState);
