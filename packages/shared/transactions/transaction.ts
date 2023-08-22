@@ -23,6 +23,10 @@ export interface TemporalRecurringTransaction extends TemporalTransaction {
   rule: string;
   canOccurOnWeekends?: boolean;
   canOccurOnHolidays?: boolean;
+  /** Date (as unix timestamp) to boolean map */
+  exclusions?: Map<number, boolean>;
+  /** Date (as unix timestamp) to partial object, used to override properties */
+  overrides?: Map<number, Partial<TemporalTransaction>>;
 }
 
 export function isRecurringTransaction(transaction: TemporalTransaction): transaction is TemporalRecurringTransaction {
@@ -53,17 +57,42 @@ export class TemporalTransactions {
     return this;
   }
 
-  remove(id: string) {
-    this.transactions = this.transactions.filter((transaction) => transaction.id !== id);
+  remove(id: string, allInstances = true, date?: Date) {
+    if (allInstances) {
+      this.transactions = this.transactions.filter((transaction) => transaction.id !== id);
+    } else {
+      // To remove a particular instance of a recurring transaction, we first need to ensure that the transaction is a recurring transaction
+      // Then, we want to add an exception to the rule for the date of the transaction
+      const transaction = this.getById(id);
+      if (transaction && date && isRecurringTransaction(transaction)) {
+        transaction.exclusions = transaction.exclusions ?? new Map();
+        transaction.exclusions.set(+date, true);
+        this.edit(id, transaction);
+      }
+    }
     return this;
   }
 
-  edit(id: string, transaction: Partial<TemporalTransaction>) {
-    const index = this.transactions.findIndex((transaction) => transaction.id === id);
-    this.transactions[index] = {
-      ...this.transactions[index],
-      ...transaction,
-    };
+  edit(id: string, transaction: Partial<TemporalTransaction>, allInstances = true, date?: Date) {
+    if (allInstances) {
+      const index = this.transactions.findIndex((transaction) => transaction.id === id);
+      this.transactions[index] = {
+        ...this.transactions[index],
+        ...transaction,
+      };
+    } else {
+      // To edit a particular instance of a recurring transaction, we first need to ensure that the transaction is a recurring transaction
+      // Then, we want to add an override to the rule for the date of the transaction
+      const tx = this.getById(id);
+      if (tx && date && isRecurringTransaction(tx)) {
+        tx.overrides = tx.overrides ?? new Map();
+        tx.overrides.set(+date, {
+          ...tx.overrides.get(+date),
+          ...transaction,
+        });
+        this.edit(id, tx);
+      }
+    }
     return this;
   }
 
@@ -78,16 +107,35 @@ export class TemporalTransactions {
         const rule = RRule.fromString(transaction.rule);
         ruleSet.rrule(rule);
 
-        const dates = ruleSet.between(startDate, endDate);
-        const adjustedDates = dates.map((date) =>
-          this.adjustForWeekendsAndHolidays(date, transaction.canOccurOnWeekends, transaction.canOccurOnHolidays),
-        );
+        let dates = ruleSet.between(startDate, endDate);
+
+        // If we have exclusions, remove them from the dates
+        if (transaction.exclusions) {
+          dates = dates.filter((date) => !transaction.exclusions?.has(+date));
+        }
+
+        // Adjust for weekends and holidays
+        if (!transaction.canOccurOnWeekends || !transaction.canOccurOnHolidays) {
+          dates = dates.map((date) =>
+            this.adjustForWeekendsAndHolidays(date, transaction.canOccurOnWeekends, transaction.canOccurOnHolidays),
+          );
+        }
 
         // For each adjusted date within the range, return a separate transaction
-        return adjustedDates.map((date) => ({
-          ...transaction,
-          date,
-        }));
+        return dates.map((date) => {
+          // If we have overrides, use them
+          if (transaction.overrides?.has(+date)) {
+            return {
+              ...transaction,
+              ...transaction.overrides.get(+date),
+              date,
+            };
+          }
+          return {
+            ...transaction,
+            date,
+          };
+        });
       } else {
         return transaction.date >= startDate && transaction.date <= endDate ? [transaction] : [];
       }
@@ -112,27 +160,6 @@ export class TemporalTransactions {
   }
 
   getTransactions() {
-    // @TODO Remove this as it's a mock
-    // if (this.transactions.length === 0) {
-    //   return [
-    //     {
-    //       id: '1',
-    //       date: new Date(),
-    //       description: 'Test Transaction #1',
-    //       type: TemporalTransactionType.CREDIT,
-    //       amount: 100,
-    //       tags: ['test', 'test2'],
-    //     },
-    //     {
-    //       id: '2',
-    //       date: new Date(),
-    //       description: 'Test Transaction #2',
-    //       type: TemporalTransactionType.DEBIT,
-    //       amount: 20.54,
-    //       tags: ['test', 'test2'],
-    //     },
-    //   ];
-    // }
     return this.transactions;
   }
 

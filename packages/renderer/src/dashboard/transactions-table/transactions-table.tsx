@@ -1,14 +1,6 @@
-import {
-  TemporalTransaction,
-  TemporalTransactionType,
-} from "@shared/transactions";
+import { TemporalTransaction } from "@shared/transactions";
 import { createSignal, onMount } from "solid-js";
-import { styled } from "solid-styled-components";
-
-export const TransactionBadge = styled("div")`
-  border: none;
-  color: #fff;
-`;
+import TableRow from "./transactions-table-row";
 
 export default function TransactionsTable(props: {
   transactions: TemporalTransaction[];
@@ -58,35 +50,7 @@ export default function TransactionsTable(props: {
               itemsPerPage() * currentPage() + itemsPerPage()
             )
             .map((transaction) => (
-              <tr>
-                <td class="font-bold">
-                  {transaction.date?.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                <td>{transaction.description}</td>
-                <td
-                  class={
-                    transaction.type === TemporalTransactionType.CREDIT
-                      ? "text-success"
-                      : "text-error"
-                  }
-                >
-                  {`${
-                    transaction.type === TemporalTransactionType.CREDIT
-                      ? "$"
-                      : "-$"
-                  }${transaction.amount.toFixed(2)}`}
-                </td>
-                <td>
-                  {transaction.tags.map((tag) => (
-                    <TransactionBadge class="badge bg-primary">
-                      {tag}
-                    </TransactionBadge>
-                  ))}
-                </td>
-              </tr>
+              <TableRow transaction={transaction} />
             ))}
           {props.transactions.length > itemsPerPage() && (
             <tr>

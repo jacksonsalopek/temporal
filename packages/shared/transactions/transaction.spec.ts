@@ -79,6 +79,7 @@ describe('TemporalTransactions', () => {
         title: 'Test ($100.00)',
         start: transaction.date,
         allDay: true,
+        color: 'hsl(var(--su))',
       },
     ]);
   });
@@ -135,5 +136,62 @@ describe('TemporalTransactions', () => {
     endDate.setDate(startDate.getDate() + 1);
 
     expect(transactions.getSubtotalInRange(startDate, endDate)).toBe(0);
+  });
+
+  it('should add an exclusion if removing a singular instance of a recurring transaction', () => {
+    const recurring: TemporalRecurringTransaction = {
+      id: '1',
+      type: TemporalTransactionType.CREDIT,
+      amount: 100,
+      date: new Date(),
+      description: 'Test',
+      tags: [],
+      rule: 'RRULE:FREQ=MONTHLY;BYMONTHDAY=15,-1',
+      canOccurOnHolidays: false,
+      canOccurOnWeekends: false,
+    };
+
+    transactions.add(recurring);
+
+    const startDate = new Date();
+    const endDate = new Date(+startDate + 1000 * 60 * 60 * 24 * 365);
+
+    const events = transactions.getInDateRange(startDate, endDate).toCalendarEvents() as EventInput[];
+    expect(events.length).toBe(24);
+
+    const firstEvent = events[0];
+    transactions.remove('1', false, firstEvent.start as Date);
+
+    const newEvents = transactions.getInDateRange(startDate, endDate).toCalendarEvents() as EventInput[];
+    expect(newEvents.length).toBe(23);
+  });
+
+  it('should allow you to override a property when editing a singular instance of recurring transaction', () => {
+    const recurring: TemporalRecurringTransaction = {
+      id: '1',
+      type: TemporalTransactionType.CREDIT,
+      amount: 100,
+      date: new Date(),
+      description: 'Test',
+      tags: [],
+      rule: 'RRULE:FREQ=MONTHLY;BYMONTHDAY=15,-1',
+      canOccurOnHolidays: false,
+      canOccurOnWeekends: false,
+    };
+
+    transactions.add(recurring);
+
+    const startDate = new Date();
+    const endDate = new Date(+startDate + 1000 * 60 * 60 * 24 * 365);
+
+    const events = transactions.getInDateRange(startDate, endDate).toCalendarEvents() as EventInput[];
+    expect(events.length).toBe(24);
+
+    const firstEvent = events[0];
+    transactions.edit('1', { description: 'New Description' }, false, firstEvent.start as Date);
+
+    const newEvents = transactions.getInDateRange(startDate, endDate).toCalendarEvents() as EventInput[];
+    expect(newEvents.length).toBe(24);
+    expect(newEvents[0].title).toBe('New Description ($100.00)');
   });
 });

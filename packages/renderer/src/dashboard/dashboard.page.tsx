@@ -18,7 +18,7 @@ import {
 } from "solid-icons/ri";
 import { styled } from "solid-styled-components";
 import AddTransactionForm from "./add-transaction-form/add-transaction-form";
-import TransactionsTable from "./transactions-table";
+import TransactionsTable from "./transactions-table/transactions-table";
 import { createSignal } from "solid-js";
 import { TransactionsSlice } from "@/store/transactions";
 import GetSubtotalOnDateForm from "./get-subtotal-on-date-form/get-subtotal-on-date-form";
@@ -85,14 +85,6 @@ export default function Dashboard() {
   const dashboardSlice = store?.refs.dashboard as DashboardSlice;
   const transactionsSlice = store?.refs.transactions as TransactionsSlice;
   const isFABToggled = () => dashboardSlice.isFABToggled();
-
-  const handleFormCompletion = (complete: boolean) => {
-    if (complete) {
-      setStats(dashboardSlice.getStats());
-      setTransactions(getTransactions());
-    }
-  };
-
   const [stats, setStats] = createSignal(dashboardSlice.getStats());
 
   const today = new Date();
@@ -105,6 +97,13 @@ export default function Dashboard() {
       ?.getTransactions()
       .sort((a, b) => +a.date - +b.date) ?? [];
   const [transactions, setTransactions] = createSignal(getTransactions());
+
+  const handleFormCompletion = (complete: boolean) => {
+    if (complete) {
+      setStats(dashboardSlice.getStats());
+      setTransactions(getTransactions());
+    }
+  };
 
   return (
     <>
