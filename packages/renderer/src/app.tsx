@@ -69,20 +69,6 @@ const App: Component = () => {
           {getNameFromPathname(location.pathname)}
         </div>
         <div class="navbar-center lg:flex flex-1" />
-        <div class="flex-none gap-2">
-          <div class="form-control">
-            <div class="input-group">
-              <input type="text" placeholder="Search…" class="input" />
-              <button
-                class="btn btn-square bg-base-100 border-none"
-                title="Search button"
-                type="button"
-              >
-                <RiSystemSearchEyeLine size={24} />
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="drawer mt-5">
