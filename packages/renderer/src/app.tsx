@@ -107,12 +107,6 @@ const App: Component = () => {
               </A>
             </li>
             <li>
-              <A href="/timeline">
-                <FaSolidTimeline fill="currentcolor" />
-                Timeline
-              </A>
-            </li>
-            <li>
               <A href="/investments">
                 <RiBusinessLineChartLine />
                 Investments
